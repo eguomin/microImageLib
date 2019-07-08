@@ -1,0 +1,709 @@
+#define blockSize 1024
+#define blockSize2Dx 32
+#define blockSize2Dy 32
+#define blockSize3Dx 16
+#define blockSize3Dy 8
+#define blockSize3Dz 8
+
+#ifdef __CUDACC__
+typedef double2 dComplex;
+#else
+typedef struct{
+	double x;
+	double y;
+} dComplex;
+
+#endif
+
+#ifdef __CUDACC__
+typedef float2 fComplex;
+#else
+typedef struct{
+	float x;
+	float y;
+} fComplex;
+
+#endif
+//template <class T>
+texture<float, 3, cudaReadModeElementType> tex; // declare texture
+
+texture<unsigned short, 3, cudaReadModeElementType> tex16; // declare texture
+
+__constant__ float d_aff[12]; // 3x4 Affine transform: constant array
+
+texture<float, 2, cudaReadModeElementType> tex2D1; // declare texture
+
+// Utility class used to avoid linker errors with extern
+// unsized shared memory arrays with templated type
+template<class T>
+struct SharedMemory
+{
+	__device__ inline operator T *()
+	{
+		extern __shared__ int __smem[];
+		return (T *)__smem;
+	}
+
+	__device__ inline operator const T *() const
+	{
+		extern __shared__ int __smem[];
+		return (T *)__smem;
+	}
+};
+
+// specialize for double to avoid unaligned memory
+// access compile errors
+template<>
+struct SharedMemory<double>
+{
+	__device__ inline operator double *()
+	{
+		extern __shared__ double __smem_d[];
+		return (double *)__smem_d;
+	}
+
+	__device__ inline operator const double *() const
+	{
+		extern __shared__ double __smem_d[];
+		return (double *)__smem_d;
+	}
+};
+
+// Basic math functions kernels
+template <class T>
+__global__ void
+add3Dkernel(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		d_odata[ijk] = d_idata1[ijk] + d_idata2[ijk];
+	}
+
+}
+
+template <class T>
+__global__ void
+addvaluekernel(T *d_odata, T *d_idata1, T d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		d_odata[ijk] = d_idata1[ijk] + d_idata2;
+	}
+
+}
+
+template <class T>
+__global__ void
+sub3Dkernel(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		d_odata[ijk] = d_idata1[ijk] - d_idata2[ijk];
+	}
+
+}
+
+template <class T>
+__global__ void
+multi3Dkernel(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		d_odata[ijk] = d_idata1[ijk] * d_idata2[ijk];
+	}
+
+}
+
+template <class T>
+__global__ void
+multivaluekernel(T *d_odata, T *d_idata1, T d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		d_odata[ijk] = d_idata1[ijk] * d_idata2;
+	}
+
+}
+
+__global__ void
+multicomplex3Dkernel(fComplex *d_odata, fComplex *d_idata1, fComplex *d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		fComplex a = d_idata1[ijk];
+		fComplex b = d_idata2[ijk];
+		d_odata[ijk].x = a.x*b.x - a.y*b.y;
+		d_odata[ijk].y = a.x*b.y + a.y*b.x;
+	}
+
+}
+
+__global__ void
+multidcomplex3Dkernel(dComplex *d_odata, dComplex *d_idata1, dComplex *d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		dComplex a = d_idata1[ijk];
+		dComplex b = d_idata2[ijk];
+		d_odata[ijk].x = a.x*b.x - a.y*b.y;
+		d_odata[ijk].y = a.x*b.y + a.y*b.x;
+	}
+
+}
+
+template <class T>
+__global__ void
+div3Dkernel(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		//if (d_idata2[ijk] == 0) d_idata2[ijk] = 1e-10;
+		d_odata[ijk] = d_idata1[ijk] / d_idata2[ijk];
+	}
+
+}
+
+__global__ void
+conj3Dkernel(fComplex *d_odata, fComplex *d_idata, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		d_odata[ijk].x = d_idata[ijk].x;
+		d_odata[ijk].y = -d_idata[ijk].y;
+	}
+
+}
+
+template <class T>
+__global__ void
+sumgpukernel(T *g_idata, T *g_temp, int n, bool nIsPow2)
+{
+	T *sdata = SharedMemory<T>();
+
+	// perform first level of reduction,
+	// reading from global memory, writing to shared memory
+	unsigned int tid = threadIdx.x;
+	unsigned int i = blockIdx.x*blockSize * 2 + threadIdx.x;
+	unsigned int gridSize = blockSize * 2 * gridDim.x;
+
+	T mySum = 0;
+
+	// we reduce multiple elements per thread.  The number is determined by the
+	// number of active thread blocks (via gridDim).  More blocks will result
+	// in a larger gridSize and therefore fewer elements per thread
+	while (i < n)
+	{
+		mySum += g_idata[i];
+
+		// ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
+		if (nIsPow2 || i + blockSize < n)
+			mySum += g_idata[i + blockSize];
+
+		i += gridSize;
+	}
+
+	// each thread puts its local sum into shared memory
+	sdata[tid] = mySum;
+	__syncthreads();
+
+
+	// do reduction in shared mem
+	if (blockSize >= 512)
+	{
+		if (tid < 256)
+		{
+			sdata[tid] = mySum = mySum + sdata[tid + 256];
+		}
+
+		__syncthreads();
+	}
+
+	if (blockSize >= 256)
+	{
+		if (tid < 128)
+		{
+			sdata[tid] = mySum = mySum + sdata[tid + 128];
+		}
+
+		__syncthreads();
+	}
+
+	if (blockSize >= 128)
+	{
+		if (tid <  64)
+		{
+			sdata[tid] = mySum = mySum + sdata[tid + 64];
+		}
+
+		__syncthreads();
+	}
+
+	if (tid < 32)
+	{
+		// now that we are using warp-synchronous programming (below)
+		// we need to declare our shared memory volatile so that the compiler
+		// doesn't reorder stores to it and induce incorrect behavior.
+		volatile T *smem = sdata;
+
+		if (blockSize >= 64)
+		{
+			smem[tid] = mySum = mySum + smem[tid + 32];
+		}
+
+		if (blockSize >= 32)
+		{
+			smem[tid] = mySum = mySum + smem[tid + 16];
+		}
+
+		if (blockSize >= 16)
+		{
+			smem[tid] = mySum = mySum + smem[tid + 8];
+		}
+
+		if (blockSize >= 8)
+		{
+			smem[tid] = mySum = mySum + smem[tid + 4];
+		}
+
+		if (blockSize >= 4)
+		{
+			smem[tid] = mySum = mySum + smem[tid + 2];
+		}
+
+		if (blockSize >= 2)
+		{
+			smem[tid] = mySum = mySum + smem[tid + 1];
+		}
+	}
+
+	// write result for this block to global mem
+	if (tid == 0)
+		g_temp[blockIdx.x] = sdata[0];
+}
+
+template <class T>
+__global__ void
+sumgpu1Dkernel(T *g_idata, T *g_temp, int totalSize)
+{
+	// perform first level of reduction,
+	// reading from global memory, writing to shared memory
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int tempDataSize = 5 * blockSize;
+	const int sz = (totalSize % tempDataSize != 0) ? (totalSize / tempDataSize + 1) : (totalSize / tempDataSize);
+	T mySum = 0;
+
+	for (int k = 0; k < sz; k++)
+	{
+		if ((i + k*tempDataSize)<totalSize)
+			mySum += g_idata[i + k*tempDataSize];
+	}
+
+	// each thread puts its local sum into shared memory
+	g_temp[i] = mySum;
+}
+
+template <class T>
+__global__ void
+reduceZ(T *d_idata, double *d_temp, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	if (i < sx && j < sy){
+		int zStep = sx*sy;
+		d_temp[i + sx * j] = 0;
+		for (int k = 0; k < sz; k++)
+			d_temp[i + sx * j] += (double)d_idata[i + sx * j + zStep * k];
+	}
+}
+
+template <class T>
+__global__ void
+maxZkernel(T *d_idata, T *d_temp1, int *d_temp2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	if (i < sx && j < sy){
+		T p = d_idata[i + sx * j];
+		int z0 = 0;
+		int zStep = sx*sy;
+		for (int k = 0; k < sz; k++)
+			if (p < d_idata[i + sx * j + zStep * k]){
+				p = d_idata[i + sx * j + zStep * k];
+				z0 = k;
+			}
+		d_temp1[i + sx * j] = p;
+		d_temp2[i + sx * j] = z0;
+	}
+}
+
+template <class T>
+__global__ void
+maxvalue3Dgpukernel(T *d_odata, T *d_idata1, T d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		d_odata[ijk] = (d_idata1[ijk] > d_idata2) ? d_idata1[ijk] : d_idata2;
+	}
+
+}
+
+template <class T>
+__global__ void
+maxprojectionkernel(T *d_odata, T *d_idata, int sx, int sy, int sz, int psx, int psy, int psz, int pDirection){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	if (i < psx && j < psy){
+		int zStep = sx*sy;
+		T a = 0;
+		if (pDirection == 1){
+			for (int k = 0; k < psz; k++)
+				a = (a>d_idata[i + sx*j + zStep*k]) ? a : d_idata[i + sx*j + zStep*k];
+			d_odata[i + j*psx] = a;
+		}
+		if (pDirection == 2){
+			for (int k = 0; k < psz; k++)
+				a = (a>d_idata[j + sx*k + zStep*i]) ? a : d_idata[j + sx*k + zStep*i];
+			d_odata[i + j*psx] = a;
+		}
+		if (pDirection == 3){
+			for (int k = 0; k < psz; k++)
+				a = (a>d_idata[k + sx*i + zStep*j]) ? a : d_idata[k + sx*i + zStep*j];
+			d_odata[i + j*psx] = a;
+		}
+	}
+}
+
+///////////////////////////////////
+// other functions
+template <class T>
+__global__ void changestorageordergpukernel(T *d_odata, T *d_idata, int sx, int sy, int sz, int orderMode){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		if (orderMode==1)//change tiff storage order to C storage order: 
+			//output[i][j][k] = input[k][j][i]
+			d_odata[i*sy*sz + j*sz + k] = d_idata[k*sy*sx + j*sx + i];
+		else if (orderMode == -1)//change C storage order to tiff storage order: 
+			//output[k][j][i] = input[i][j][k]
+			d_odata[k*sy*sx + j*sx + i] = d_idata[i*sy*sz + j*sz + k];
+	}
+}
+
+template <class T>
+__global__ void rotbyyaxiskernel(T *d_odata, T *d_idata, int sx, int sy, int sz, int rotDirection){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		if (rotDirection == 1)//rotate 90 deg around Y axis 
+			//output[sz-k-1][j][i] = input[i][j][k]
+			d_odata[(sz-k-1)*sx*sy + j*sx + i] = d_idata[i*sy*sz + j*sz + k];
+		else if(rotDirection == -1)//rotate -90 deg around Y axis
+			//output[k][j][sx - i - 1] = input[i][j][k]
+			d_odata[k*sy*sx + j*sx + (sx-i-1)] = d_idata[i*sy*sz + j*sz + k];
+	}
+}
+
+template <class T>
+__global__ void flipPSFkernel(T *d_odata, T *d_idata, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		//h_flippedPSFA[i][j][k] = h_PSFA[PSFx-i-1][PSFy-j-1][PSFz-k-1]
+		d_odata[i*sy*sz + j*sz + k] = d_idata[(sx - i - 1) *sy*sz + (sy - j - 1)*sz + (sz - k - 1)];
+	}
+}
+
+template <class T>
+__global__ void padPSFKernel(
+	T *d_PaddedPSF,
+	T *d_PSF,
+	int FFTx,
+	int FFTy,
+	int FFTz,
+	int PSFx,
+	int PSFy,
+	int PSFz,
+	int PSFox,
+	int PSFoy,
+	int PSFoz
+	){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	if (x < PSFx && y < PSFy && z < PSFz){
+		int dx, dy, dz;
+		dx = x - PSFox; dy = y - PSFoy; dz = z - PSFoz;
+		if (dx < 0) dx += FFTx;
+		if (dy < 0) dy += FFTy;
+		if (dz < 0) dz += FFTz;
+		//d_PaddedPSF[dx][dy][dz] = d_PSF[x][y][z]
+		if (dx >= 0 && dx < FFTx && dy >= 0 && dy < FFTy && dz >= 0 && dz < FFTz)
+			d_PaddedPSF[dx*FFTy*FFTz + dy*FFTz + dz] = d_PSF[x*PSFy*PSFz + y*PSFz + z];
+	}
+}
+
+template <class T>
+__global__ void padStackKernel(
+	T *d_PaddedStack,
+	T *d_Stack,
+	int FFTx,
+	int FFTy,
+	int FFTz,
+	int sx,
+	int sy,
+	int sz,
+	int imox,
+	int imoy,
+	int imoz
+	){
+	const int dx = blockDim.x * blockIdx.x + threadIdx.x;
+	const int dy = blockDim.y * blockIdx.y + threadIdx.y;
+	const int dz = blockDim.z * blockIdx.z + threadIdx.z;
+	if (dx < FFTx && dy < FFTy && dz < FFTz){
+		int x, y, z;
+		if (dx < imox){
+			x = 0;
+		}
+		if (dy < imoy){
+			y = 0;
+		}
+		if (dz < imoz){
+			z = 0;
+		}
+		if (dx >= imox && dx < (imox + sx)){
+			x = dx - imox;
+		}
+		if (dy >= imoy && dy < (imoy + sy)){
+			y = dy - imoy;
+		}
+		if (dz >= imoz && dz < (imoz + sz)){
+			z = dz - imoz;
+		}
+		if (dx >= (imox + sx)){
+			x = sx - 1;
+		}
+		if (dy >= (imoy + sy)){
+			y = sy - 1;
+		}
+		if (dz >= (imoz + sz)){
+			z = sz - 1;
+		}
+		d_PaddedStack[dx*FFTy*FFTz + dy*FFTz + dz] = d_Stack[x*sy*sz + y*sz + z];
+	}
+}
+
+template <class T>
+__global__ void cropStackKernel(
+	T *d_PaddedStack,
+	T *d_Stack,
+	int FFTx,
+	int FFTy,
+	int FFTz,
+	int sx,
+	int sy,
+	int sz,
+	int imox,
+	int imoy,
+	int imoz
+	){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	if (x < sx && y < sy && z < sz){
+		int dx, dy, dz;
+		dx = imox + x; dy = imoy + y; dz = imoz + z;
+		d_Stack[x*sy*sz + y*sz + z] = d_PaddedStack[dx*FFTy*FFTz + dy*FFTz + dz];
+	}
+}
+
+
+__global__ void accesstexturekernel(
+	float x,
+	float y,
+	float z
+	){
+	float xi = x + (float)threadIdx.x;
+	float yi = y + (float)threadIdx.y;
+	float zi = z + (float)threadIdx.z;
+	float testValue = tex3D(tex, xi, yi, zi);//by using this the error occurs
+	printf("Coordinates: %f,%f,%f, value: %f\n", xi, yi, zi, testValue);
+}
+
+template <class T>
+__global__ void affinetransformkernel(
+	T *d_t,
+	int sx,
+	int sy,
+	int sz,
+	int sx2,
+	int sy2,
+	int sz2
+	){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	// coordinates transformation
+	if (x < sx && y < sy && z < sz){
+		float ix = (float)x;
+		float iy = (float)y;
+		float iz = (float)z;
+		float tx = d_aff[0] * ix + d_aff[1] * iy + d_aff[2] * iz + d_aff[3];
+		float ty = d_aff[4] * ix + d_aff[5] * iy + d_aff[6] * iz + d_aff[7];
+		float tz = d_aff[8] * ix + d_aff[9] * iy + d_aff[10] * iz + d_aff[11];
+		// texture interpolation
+		// d_Stack[x*imy*imz + y*imz + z] = tex3D(tex, tx, ty, tz); //d_Stack[k][j][i] = tex3D[i][j][k]
+		if (tx >= 0 && tx < sx2 && ty >= 0 && ty < sy2 && tz >= 0 && tz < sz2){
+			if (sizeof(T) == 2)
+				d_t[x + y*sx + z*sx*sy] = tex3D(tex16, tx, ty, tz); // d_Stack[i][j][k] = tex3D[i][j][k], Target image in texture
+			else
+				d_t[x + y*sx + z*sx*sy] = tex3D(tex, tx, ty, tz); // d_Stack[i][j][k] = tex3D[i][j][k], Target image in texture
+		}
+		else
+			d_t[x + y*sx + z*sx*sy] = 0;
+	}
+}
+
+__global__ void corrkernel(
+	float *d_s,
+	float *d_sqr,
+	float *d_corr,
+	int sx,
+	int sy,
+	int sz,
+	int sx2,
+	int sy2,
+	int sz2
+	){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	float t, s;
+	// coordinates transformation
+	if (x < sx && y < sy && z < sz){
+		float ix = (float)x;
+		float iy = (float)y;
+		float iz = (float)z;
+		float tx = d_aff[0] * ix + d_aff[1] * iy + d_aff[2] * iz + d_aff[3];
+		float ty = d_aff[4] * ix + d_aff[5] * iy + d_aff[6] * iz + d_aff[7];
+		float tz = d_aff[8] * ix + d_aff[9] * iy + d_aff[10] * iz + d_aff[11];
+		// texture interpolation
+		// d_Stack[x*imy*imz + y*imz + z] = tex3D(tex, tx, ty, tz); //d_Stack[k][j][i] = tex3D[i][j][k]
+		//if (tx>0 && tx < sx2 && ty>0 && ty < sy2 && tz>0 && tz < sz2)
+			t = tex3D(tex, tx, ty, tz); // d_Stack[i][j][k] = tex3D[i][j][k], Target image in texture
+		//else
+		//	t = 0;
+		s = d_s[x + y*sx + z*sx*sy];
+		d_sqr[x + y*sx + z*sx*sy] = t*t;
+		d_corr[x + y*sx + z*sx*sy] = s * t;
+	}
+}
+
+__global__ void corrkernel2(
+	float *d_s,
+	double *d_temp1,
+	double *d_temp2,
+	int sx,
+	int sy,
+	int sz,
+	int sx2,
+	int sy2,
+	int sz2
+	){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	int z;
+	float t, s;
+	double tt = 0, st = 0;
+	// coordinates transformation
+	if (x < sx && y < sy){
+		for (z = 0; z < sz; z++){
+			float ix = (float)x;
+			float iy = (float)y;
+			float iz = (float)z;
+			float tx = d_aff[0] * ix + d_aff[1] * iy + d_aff[2] * iz + d_aff[3];
+			float ty = d_aff[4] * ix + d_aff[5] * iy + d_aff[6] * iz + d_aff[7];
+			float tz = d_aff[8] * ix + d_aff[9] * iy + d_aff[10] * iz + d_aff[11];
+			// texture interpolation
+			// d_Stack[x*imy*imz + y*imz + z] = tex3D(tex, tx, ty, tz); //d_Stack[k][j][i] = tex3D[i][j][k]
+			//if (tx>0 && tx < sx2 && ty>0 && ty < sy2 && tz>0 && tz < sz2)
+			t = tex3D(tex, tx, ty, tz); // d_Stack[i][j][k] = tex3D[i][j][k], Target image in texture
+			//else
+			//	t = 0;
+			s = d_s[x + y*sx + z*sx*sy];
+			tt += (double)t*t;
+			st += (double)s*t;
+		}
+		d_temp1[x + y*sx] = tt;
+		d_temp2[x + y*sx] = st;
+	}
+}
+
+
+__global__ void affineTransform2Dkernel(float *d_t, int sx, int sy, int sx2, int sy2){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	// coordinates transformation
+	if (x < sx && y < sy){
+		float ix = (float)x;
+		float iy = (float)y;
+		float tx = d_aff[0] * ix + d_aff[1] * iy + d_aff[2];
+		float ty = d_aff[3] * ix + d_aff[4] * iy + d_aff[5];
+		if (tx>0 && tx < sx2 && ty>0 && ty < sy2)
+			d_t[x + y*sx] = tex2D(tex2D1, tx, ty);
+		else
+			d_t[x + y*sx] = 0;
+		
+	}
+}
+
+__global__ void corr2Dkernel(
+	float *d_s,
+	float *d_sqr,
+	float *d_corr,
+	int sx,
+	int sy,
+	int sx2,
+	int sy2
+	){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	float t, s;
+	// coordinates transformation
+	if (x < sx && y < sy){
+		float ix = (float)x;
+		float iy = (float)y;
+		//float tx = d_aff[0] * ix + d_aff[1] * iy + d_aff[2];
+		//float ty = d_aff[3] * ix + d_aff[4] * iy + d_aff[5] ;
+		float tx = d_aff[0] * ix + d_aff[1] * iy + d_aff[2];
+		float ty = d_aff[3] * ix + d_aff[4] * iy + d_aff[5] ;
+		// texture interpolation
+		if (tx>0 && tx < sx2 && ty>0 && ty < sy2)
+			t = tex2D(tex2D1, tx, ty);
+		else
+			t = 0;
+		s = d_s[x + y*sx];
+		d_sqr[x + y*sx] = t*t;
+		d_corr[x + y*sx] = s * t;
+	}
+}
