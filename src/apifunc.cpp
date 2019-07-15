@@ -7,6 +7,7 @@
 #include <math.h>
 #include <ctime>
 #include <time.h>
+#include <sys/stat.h>
 #ifdef _WIN32
 #include <windows.h>
 #include <tchar.h>
@@ -115,8 +116,8 @@ int findSubFolders(char *subFolderNames, char *pathIn)
 		
 	return i;
 }
-
 #endif
+
 unsigned short gettifinfo(char tifdir[], unsigned int *tifSize){
 	TIFF *tif = TIFFOpen(tifdir, "r");
 	uint16 bitPerSample;
@@ -855,7 +856,7 @@ int affinetrans_3dgpu(float *h_reg, float *iTmx, float *h_img2, unsigned int *im
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float>();
 	cudaArray *d_ArrayTemp;
 	cudaMalloc3DArray(&d_ArrayTemp, &channelDesc, make_cudaExtent(imx2, imy2, imz2));
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	cudaCheckErrors("****GPU array memory allocating fails... GPU out of memory !!!!*****\n");
 	cudaMemset(d_img3DTemp, 0, totalSize1*sizeof(float));
 	cudacopyhosttoarray(d_ArrayTemp, channelDesc, h_img2, imx2, imy2, imz2);
@@ -883,7 +884,7 @@ int affinetrans_3dgpu_16to16(unsigned short *h_reg, float *iTmx, unsigned short 
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<unsigned short>();
 	cudaArray *d_Array;
 	cudaMalloc3DArray(&d_Array, &channelDesc, make_cudaExtent(imx2, imy2, imz2));
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	cudaCheckErrors("****GPU array memory allocating fails... GPU out of memory !!!!*****\n");
 	cudaMemset(d_img3D16, 0, totalSize1*sizeof(unsigned short));
 	cudacopyhosttoarray(d_Array, channelDesc, h_img2, imx2, imy2, imz2);
@@ -1087,7 +1088,7 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float>();
 	cudaArray *d_Array;
 	cudaMalloc3DArray(&d_Array, &channelDesc, make_cudaExtent(imx2, imy2, imz2));
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	cudaCheckErrors("****GPU array memory allocating fails... GPU out of memory !!!!*****\n");
 	cudaMemGetInfo(&freeMem, &totalMem);
 	regRecords[1] = (float)freeMem / 1048576.0f;
@@ -1326,7 +1327,7 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	memcpy(iTmx, h_aff, NDIM*sizeof(float));
 	//****write registerred stack and transformation matrix***//
 	// always save transformation matrix
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	end = clock();
 	regRecords[7] = (float)(end - start) / CLOCKS_PER_SEC;
 	cudaMemGetInfo(&freeMem, &totalMem);
@@ -1830,7 +1831,7 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		}
 		cropStack(d_StackE, d_StackT, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
 		//printf("...Deconvolution completed ! ! !\n");
-		cudaThreadSynchronize();
+		cudaDeviceSynchronize();
 		changestorageordergpu(d_StackE, d_StackT, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
 		cudaMemcpy(h_decon, d_StackE, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
 
@@ -1908,7 +1909,7 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		}
 		cropStack(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
 		//printf("...Deconvolution completed ! ! !\n");
-		cudaThreadSynchronize();
+		cudaDeviceSynchronize();
 		//## Write stack to tiff image
 		changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
 		cudaMemcpy(h_decon, d_StackA, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
@@ -2181,7 +2182,7 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 			}
 			cropStack(d_StackE, d_StackT, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
 			//printf("...Deconvolution completed ! ! !\n");
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 			changestorageordergpu(d_StackE, d_StackT, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
 			cudaMemcpy(h_decon, d_StackE, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
 			time3 = clock();
@@ -2314,7 +2315,7 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 
 			}
 			cropStack(d_StackE, d_StackT, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 			changestorageordergpu(d_StackE, d_StackT, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
 			cudaMemcpy(h_decon, d_StackE, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
 			time3 = clock();
@@ -2460,7 +2461,7 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 				maxvalue3Dgpu(d_StackE, d_StackE, float(SMALLVALUE), FFTx, FFTy, FFTz);
 			}
 			cropStack(d_StackE, d_StackA, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
 			cudaMemcpy(h_decon, d_StackE, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
 			time3 = clock();
@@ -2628,7 +2629,7 @@ int fusion_dualview(float *h_decon, float *h_reg, float *iTmx, float *h_img1, fl
 	}// after interpolation, Stack A size: imx x imy x imz;
 	else
 		memcpy(h_StackA, h_img1, totalSize * sizeof(float));
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 
 	// image 2
 	// rotation
@@ -2657,7 +2658,7 @@ int fusion_dualview(float *h_decon, float *h_reg, float *iTmx, float *h_img1, fl
 	}// after interpolation, Stack A size: imx x imy x imz;
 	else
 		memcpy(h_StackB, h_img2, totalSize2 * sizeof(float));
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 
 	// ***** Do 2D registration or alignment
 	// only if 3D registration is set and flagInitialTmx = 2
@@ -2813,7 +2814,7 @@ int mp3Dgpu(float *h_MP, unsigned int *sizeMP, float *h_img, unsigned int *sizeI
 			affineTransform(d_StackRotation, sx, imRotationy, imRotationy, sx, sy, sz);
 			maxprojection(d_StackProject, d_StackRotation, sx, imRotationy, imRotationy, 1);
 			cudaMemcpy(&h_MP[totalSizeProjectX*iProj], d_StackProject, totalSizeProjectX * sizeof(float), cudaMemcpyDeviceToHost);
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 		}
 		sizeMP[0] = sx; sizeMP[1] = imRotationy; sizeMP[2] = projectNum;
 	}
@@ -2829,7 +2830,7 @@ int mp3Dgpu(float *h_MP, unsigned int *sizeMP, float *h_img, unsigned int *sizeI
 			affineTransform(d_StackRotation, imRotationx, sy, imRotationx, sx, sy, sz);
 			maxprojection(d_StackProject, d_StackRotation, imRotationx, sy, imRotationx, 1);
 			cudaMemcpy(&h_MP[Ystart + totalSizeProjectY*iProj], d_StackProject, totalSizeProjectY * sizeof(float), cudaMemcpyDeviceToHost);
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 		}
 		sizeMP[3] = imRotationx; sizeMP[4] = sy; sizeMP[5] = projectNum;
 	}
@@ -2868,6 +2869,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 #endif
 	}
 	if (flagMultiColor){
+#ifdef _WIN32 
 		subFolderCount = findSubFolders(&subFolderNames[0][0], mainFolder);
 
 		if (subFolderCount > 20)
@@ -2879,6 +2881,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 		}
 		inFolder1 = concat(3, mainFolder, &subFolderNames[0][0], "/SPIMA/");
 		inFolder2 = concat(3, mainFolder, &subFolderNames[0][0], "/SPIMB/");
+#endif
 	}
 	else{
 		inFolder1 = folder1;
@@ -2920,6 +2923,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 	// flagSaveInterFiles: 3 elements --> 1: save files; 0: not
 	//					[0]: Intermediate outputs; [1]: reg A; [2]: reg B;
 	if (flagMultiColor){
+#ifdef _WIN32 
 		CreateDirectory(outMainFolder, NULL);
 		for (int j = 0; j < subFolderCount; j++){
 			outFolder = concat(3, outMainFolder, &subFolderNames[j][0], "/");
@@ -2935,6 +2939,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 			free(outFolder); free(inFolder1); free(inFolder2); free(tmxFolder); free(regFolder1); //
 			free(regFolder2);
 		}
+#endif
 	}
 	else{
 		outFolder = outMainFolder;
@@ -3245,7 +3250,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 			}// after interpolation, Stack A size: imx x imy x imz;
 			else
 				memcpy(h_StackA, h_img1, totalSize * sizeof(float));
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 
 			//## image 2 or Stack B
 			readtifstack(h_img2, fileStackB, &imSizeTemp[0]); //something wrong here at the 6th reading
@@ -3275,7 +3280,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 			}// after interpolation, Stack A size: imx x imy x imz;
 			else
 				memcpy(h_StackB, h_img2, totalSize2 * sizeof(float));
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 
 			// ***** Do 2D registration or alignment
 			// only if 3D registration is set and flagInitialTmx = 2
@@ -3502,6 +3507,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 #endif
 	}
 	if (flagMultiColor){
+#ifdef _WIN32 
 		subFolderCount = findSubFolders(&subFolderNames[0][0], mainFolder);
 
 		if (subFolderCount > 20)
@@ -3513,6 +3519,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 		}
 		inFolder1 = concat(3, mainFolder, &subFolderNames[0][0], "/SPIMA/");
 		inFolder2 = concat(3, mainFolder, &subFolderNames[0][0], "/SPIMB/");
+#endif
 	}
 	else{
 		inFolder1 = folder1;
@@ -3599,6 +3606,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 	//					[3]- [5]: Decon max projections Z, Y, X;
 	//					[6], [7]: Decon 3D max projections: Y, X;
 	if (flagMultiColor){
+#ifdef _WIN32 
 		CreateDirectory(outMainFolder, NULL);
 		for (int j = 0; j < subFolderCount; j++){
 			outFolder = concat(3, outMainFolder, &subFolderNames[j][0], "/");
@@ -3627,6 +3635,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 			free(regFolder2);  free(deconFolderMP_XY); free(deconFolderMP_YZ); free(deconFolderMP_ZX);
 			free(deconFolderMP_3D_X); free(deconFolderMP_3D_Y);
 		}
+#endif
 	}
 	else{
 		outFolder = outMainFolder;
@@ -4023,7 +4032,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 		}// after interpolation, Stack A size: imx x imy x imz;
 		else
 			memcpy(h_StackA, h_img1, totalSize * sizeof(float));
-		cudaThreadSynchronize();
+		cudaDeviceSynchronize();
 
 		//## image 2 or Stack B
 		readtifstack(h_img2, fileStackB, &imSizeTemp[0]); //something wrong here at the 6th reading
@@ -4053,7 +4062,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 		}// after interpolation, Stack A size: imx x imy x imz;
 		else
 			memcpy(h_StackB, h_img2, totalSize2 * sizeof(float));
-		cudaThreadSynchronize();
+		cudaDeviceSynchronize();
 
 		// ***** Do 2D registration or alignment
 		// only if 3D registration is set and flagInitialTmx = 2
