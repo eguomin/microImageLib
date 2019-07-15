@@ -125,8 +125,8 @@ extern "C"
 #ifdef _MSC_VER  
 __declspec(dllexport) 
 #endif
-int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *h_psf, float *h_psf_bp, unsigned int *psfSize,
-int itNumForDecon, int deviceNum, int gpuMemMode, float *deconRecords);
+int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *h_psf, unsigned int *psfSize,
+int itNumForDecon, int deviceNum, int gpuMemMode, float *deconRecords, bool flagUnmatch, float *h_psf_bp);
 
 extern "C"
 #ifdef _MSC_VER  
@@ -166,10 +166,18 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 	float *pixelSize1, float *pixelSize2, int regMode, int imRotation, int flagInitialTmx, float *iTmx, float FTOL, int itLimit, int deviceNum, int *flagSaveInterFiles, float *records);
 
 extern "C"
+<<<<<<< HEAD
 #ifdef _MSC_VER  
 __declspec(dllexport) 
 #endif
 int fusion_dualview_batch(char *outFolder, char *inFolder1, char *inFolder2, char *fileNamePrefix1, char *fileNamePrefix2, int imgNumStart, int imgNumEnd, int imgNumInterval, int imgNumTest,
+=======
+__declspec(dllexport) int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePrefix, int imgNumStart, int imgNumEnd, int imgNumInterval, char *filePSF,
+int itNumForDecon, int deviceNum, int bitPerSample, bool flagMultiColor, float *records, bool flagUnmatch, char *filePSF_bp);
+
+extern "C"
+__declspec(dllexport) int fusion_dualview_batch(char *outFolder, char *inFolder1, char *inFolder2, char *fileNamePrefix1, char *fileNamePrefix2, int imgNumStart, int imgNumEnd, int imgNumInterval, int imgNumTest,
+>>>>>>> e35e1c59bff87e77d61f6cbc5034e6042c6c6f12
 	float *pixelSize1, float *pixelSize2, int regMode, int imRotation, int flagInitialTmx, float *iTmx, float FTOL, int itLimit, char *filePSF1, char *filePSF2,
 	int itNumForDecon, int deviceNum, int *flagSaveInterFiles, int bitPerSample, float *records, bool flagUnmatch, char *filePSF_bp1, char *filePSF_bp2);
 
@@ -230,6 +238,9 @@ void multivaluegpu(T *d_odata, T *d_idata1, T d_idata2, int sx, int sy, int sz);
 
 extern "C"
 void multicomplex3Dgpu(fComplex *d_odata, fComplex *d_idata1, fComplex *d_idata2, int sx, int sy, int sz);
+
+extern "C"
+void multicomplexnorm3Dgpu(fComplex *d_odata, fComplex *d_idata1, fComplex *d_idata2, int sx, int sy, int sz);
 
 extern "C"
 void multidcomplex3Dgpu(dComplex *d_odata, dComplex *d_idata1, dComplex *d_idata2, int sx, int sy, int sz);

@@ -844,25 +844,25 @@ int reg_2dshiftalignXgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2
 
 int affinetrans_3dgpu(float *h_reg, float *iTmx, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int deviceNum){
 	//image size
-	imx1 = imSize1[0]; imy1 = imSize1[1]; imz1 = imSize1[2];
-	imx2 = imSize2[0]; imy2 = imSize2[1]; imz2 = imSize2[2];
+	int sx1 = imSize1[0], sy1 = imSize1[1], sz1 = imSize1[2];
+	int sx2 = imSize2[0], sy2 = imSize2[1], sz2 = imSize2[2];
 	// total pixel count for each images
-	int totalSize1 = imx1*imy1*imz1;
-	int totalSize2 = imx2*imy2*imz2;
+	int totalSize1 = sx1*sy1*sz1;
+	int totalSize2 = sx2*sy2*sz2;
 	// GPU device
 	cudaSetDevice(deviceNum);
 	float *d_img3DTemp;
 	cudaMalloc((void **)&d_img3DTemp, totalSize1 *sizeof(float));
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float>();
 	cudaArray *d_ArrayTemp;
-	cudaMalloc3DArray(&d_ArrayTemp, &channelDesc, make_cudaExtent(imx2, imy2, imz2));
+	cudaMalloc3DArray(&d_ArrayTemp, &channelDesc, make_cudaExtent(sx2, sy2, sz2));
 	cudaDeviceSynchronize();
 	cudaCheckErrors("****GPU array memory allocating fails... GPU out of memory !!!!*****\n");
 	cudaMemset(d_img3DTemp, 0, totalSize1*sizeof(float));
-	cudacopyhosttoarray(d_ArrayTemp, channelDesc, h_img2, imx2, imy2, imz2);
+	cudacopyhosttoarray(d_ArrayTemp, channelDesc, h_img2, sx2, sy2, sz2);
 	BindTexture(d_ArrayTemp, channelDesc);
 	CopyTranMatrix(iTmx, NDIM * sizeof(float));
-	affineTransform(d_img3DTemp, imx1, imy1, imz1, imx2, imy2, imz2);
+	affineTransform(d_img3DTemp, sx1, sy1, sz1, sx2, sy2, sz2);
 	UnbindTexture();
 	cudaMemcpy(h_reg, d_img3DTemp, totalSize1 * sizeof(float), cudaMemcpyDeviceToHost);
 	cudaFreeArray(d_ArrayTemp);
@@ -900,8 +900,8 @@ int affinetrans_3dgpu_16to16(unsigned short *h_reg, float *iTmx, unsigned short 
 
 int reg_3dphasetransgpu(int *shiftXYZ, float *h_img1, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int downSample, int deviceNum, float *regRecords){
 	//image size
-	imx1 = imSize1[0]; imy1 = imSize1[1]; imz1 = imSize1[2];
-	imx2 = imSize2[0]; imy2 = imSize2[1]; imz2 = imSize2[2];
+	int sx1 = imSize1[0], sy1 = imSize1[1], sz1 = imSize1[2];
+	int sx2 = imSize2[0], sy2 = imSize2[1], sz2 = imSize2[2];
 	// print GPU devices information
 	cudaSetDevice(deviceNum);
 	//****************** Processing Starts*****************//
@@ -915,14 +915,16 @@ int reg_3dphasetransgpu(int *shiftXYZ, float *h_img1, float *h_img2, unsigned in
 	regRecords[0] = (float)freeMem / 1048576.0f;
 
 	// variables and FFT plans
-	int FFTx, FFTy, FFTz;
-	FFTx = snapTransformSize(imx1 / downSample);
-	FFTy = snapTransformSize(imy1 / downSample);
-	FFTz = snapTransformSize(imz1 / downSample);
-	int totalSize = FFTx * FFTy * FFTz;
-	int totalSizeSpectrum = FFTx * FFTy*(FFTz / 2 + 1); // in complex floating format
+	int sx3, sy3, sz3;
+	sx3 = snapTransformSize(sx1 / downSample);
+	sy3 = snapTransformSize(sy1 / downSample);
+	sz3 = snapTransformSize(sz1 / downSample);
+	//unsigned int imSizeTemp[3];
+	//imSizeTemp[0] = sx3; imSizeTemp[1] = sy3; imSizeTemp[2] = sz3;
+	int totalSize = sx3 * sy3 * sz3;
+	int totalSizeSpectrum = sx3 * sy3*(sz3 / 2 + 1); // in complex floating format
 	unsigned int imSize[3];
-	imSize[0] = FFTx; imSize[1] = FFTy; imSize[2] = FFTz;
+	imSize[0] = sx3; imSize[1] = sy3; imSize[2] = sz3;
 	float *iTmx = (float *)malloc((NDIM + 4)* sizeof(float));
 	for (int i = 0; i < 15; i++) iTmx[i] = 0; iTmx[15] = 1;
 	float *h_img1_downSample = (float *)malloc(totalSize* sizeof(float));
@@ -936,34 +938,49 @@ int reg_3dphasetransgpu(int *shiftXYZ, float *h_img1, float *h_img2, unsigned in
 	cufftHandle
 		fftPlanFwd,
 		fftPlanInv;
-	cufftPlan3d(&fftPlanFwd, FFTx, FFTy, FFTz, CUFFT_R2C);
-	cufftPlan3d(&fftPlanInv, FFTx, FFTy, FFTz, CUFFT_C2R);
+	cufftPlan3d(&fftPlanFwd, sx3, sy3, sz3, CUFFT_R2C);
+	cufftPlan3d(&fftPlanInv, sx3, sy3, sz3, CUFFT_C2R);
 	cudaCheckErrors("****Memory allocating fails... GPU out of memory !!!!*****");
 	cudaMemGetInfo(&freeMem, &totalMem);
 	regRecords[1] = (float)freeMem / 1048576.0f;
 	//**** downsample and adjust image size;
 	iTmx[0] = iTmx[5] = iTmx[10] = (float)downSample;
 	affinetrans_3dgpu(h_img1_downSample, iTmx, h_img1, &imSize[0], imSize1, deviceNum);
+	//writetifstack("tranform1.tif", h_img1_downSample, &imSizeTemp[0], 16);
 	affinetrans_3dgpu(h_img2_downSample, iTmx, h_img2, &imSize[0], imSize2, deviceNum);
+	//writetifstack("tranform2.tif", h_img2_downSample, &imSizeTemp[0], 16);
 	//*** FFT transform
 	// image 2
 	cudaMemcpy(d_downSample, h_img2_downSample, totalSize* sizeof(float), cudaMemcpyHostToDevice);
 	cufftExecR2C(fftPlanFwd, (cufftReal *)d_downSample, (cufftComplex *)d_Spectrum1);
-	conj3Dgpu(d_Spectrum2, d_Spectrum1, FFTx, FFTy, (FFTz / 2 + 1));
+	conj3Dgpu(d_Spectrum2, d_Spectrum1, sx3, sy3, (sz3 / 2 + 1));
 	// image 1
 	cudaMemcpy(d_downSample, h_img1_downSample, totalSize* sizeof(float), cudaMemcpyHostToDevice);
 	cufftExecR2C(fftPlanFwd, (cufftReal *)d_downSample, (cufftComplex *)d_Spectrum1);
 	// multiplication
-	multicomplex3Dgpu(d_Spectrum2, d_Spectrum1, d_Spectrum2, FFTx, FFTy, (FFTz / 2 + 1));
+	multicomplexnorm3Dgpu(d_Spectrum2, d_Spectrum1, d_Spectrum2, sx3, sy3, (sz3 / 2 + 1));
 	// iFFT
 	cufftExecC2R(fftPlanInv, (cufftComplex *)d_Spectrum2, (cufftReal *)d_downSample);
-
-	float peakValue = max3Dgpu(shiftXYZ, d_downSample, FFTx, FFTy, FFTz);
+	int corXYZ[3];
+	float peakValue = max3Dgpu(&corXYZ[0], d_downSample, sx3, sy3, sz3);
+	//printf("...peak value: %f;\n", peakValue);
+	//printf("...phase translation, X: %d; Y: %d; Z: %d\n", corXYZ[0], corXYZ[1], corXYZ[2]);
 	//cudaMemcpy(h_img1_downSample, d_downSample, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
 	//float peakValue = max3Dcpu(shiftXYZ, h_img1_downSample, FFTx, FFTy, FFTz);
-	shiftXYZ[0] = shiftXYZ[0] * downSample;
-	shiftXYZ[1] = shiftXYZ[1] * downSample;
-	shiftXYZ[2] = shiftXYZ[2] * downSample;
+	if (corXYZ[0] < sx3 / 4) shiftXYZ[0] = corXYZ[0] * downSample; 
+	else if (corXYZ[0] < sx3 * 3 / 4) shiftXYZ[0] = (corXYZ[0] - sx3 / 2) * downSample;
+	else shiftXYZ[0] = (corXYZ[0] - sx3) * downSample;
+	if (corXYZ[1] < sy3 / 4) shiftXYZ[1] = corXYZ[1] * downSample;
+	else if (corXYZ[1] < sy3 * 3 / 4) shiftXYZ[1] = (corXYZ[1] - sy3 / 2) * downSample;
+	else shiftXYZ[1] = (corXYZ[1] - sy3) * downSample;
+	if (corXYZ[2] < sz3 / 4) shiftXYZ[2] = corXYZ[2] * downSample;
+	else if (corXYZ[2] < sz3 * 3 / 4) shiftXYZ[2] = (corXYZ[2] - sz3 / 2) * downSample;
+	else shiftXYZ[2] = (corXYZ[2] - sz3) * downSample;
+
+	//printf("...peak value: %f;\n", peakValue);
+	//printf("...phase translation, X: %d; Y: %d; Z: %d\n", shiftXYZ[0], shiftXYZ[1], shiftXYZ[2]);
+	cudaMemcpy(h_img1_downSample, d_downSample, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
+	//writetifstack("max.tif", h_img1_downSample, &imSizeTemp[0], 32);
 	free(iTmx); free(h_img1_downSample); free(h_img2_downSample);
 	cudaFree(d_downSample); cudaFree(d_Spectrum1); cudaFree(d_Spectrum2);
 	cufftDestroy(fftPlanFwd);
@@ -980,7 +997,7 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	//registration method--> 0: no registration, transform imageB based on input matrix;1: translation only; 2: rigid body; 
 	//  3: 7 degrees of freedom (translation, rotation, scaling equally in 3 dimensions)  4: 9 degrees of freedom(translation, rotation, scaling); 
 	//  5: 12 degrees of freedom; 6:rigid body first, then do 12 degrees of freedom; 7:3 DOF --> 6 DOF --> 9 DOF --> 12 DOF
-	// inputTmx: 0, default; 1: use input matrix; 2: do 3D translation registation based on phase registration.
+	// inputTmx: 0, default; 1: use input matrix; 2: do 3D translation registation based on phase registration. 3: 2D translation based (there is a bug with this option).
 	//regRecords: 11 element array
 	//[0] -[3]: initial GPU memory, after variables allocated, after processing, after variables released ( all in MB)
 	//[4] -[6]: initial cost function value, minimized cost function value, intermediate cost function value
@@ -1005,6 +1022,7 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	cudaMemGetInfo(&freeMem, &totalMem);
 	regRecords[0] = (float)freeMem / 1048576.0f;
 
+	startWhole = clock();
 	/*
 	// write records
 	freopen("log.txt", "w", stdout);
@@ -1048,14 +1066,12 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	printf("...Maximum iteration number :~ %d\n", itLimit);
 	fclose(stdout);
 	*/
-	startWhole = clock();
 	//define variables and malloc memory
 	//for powell searching
 	float costValueInitial = 0;
 	h_aff = (float *)malloc((NDIM)* sizeof(float));
 	float *h_aff_temp = (float *)malloc((NDIM)* sizeof(float));
 	float *h_affInitial = (float *)malloc((NDIM)* sizeof(float));
-
 	static float *p = (float *)malloc((NDIM + 1) * sizeof(float));
 	static float *p_dof9 = (float *)malloc((10) * sizeof(float));
 
@@ -1101,6 +1117,7 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	//*****************************************************
 	//************** Start processing ******************
 	start = clock();
+
 	// ****************Preprocess images for registration ****************************//////
 	// subtract mean value
 	if (subBgTrigger){
@@ -1125,29 +1142,16 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 		cudacopyhosttoarray(d_Array, channelDesc, h_img2, imx2, imy2, imz2);
 		cudaCheckErrors("image2 copy2array fail");
 	}
-
-	//****** 3D registration begains********///
-	//calculate corrDenominator
-	// transfer target image into GPU memory
-	if (subBgTrigger)
-		cudaMemcpy(d_img3D, h_imgE, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
-	else
-		cudaMemcpy(d_img3D, h_img1, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
-	cudaCheckErrors("image1 memcpy fail");
-	multi3Dgpu(d_img3D, d_img3D, d_img3D, imx1, imy1, imz1);
-	sumSqr1 = sum3Dgpu(d_img3D, d_2D, h_2D, imx1, imy1, imz1);
-	corrDenominator = sqrt(sumSqr1);
-
 	//*****initialize transformation matrix*****//
 	// use input matrix as initialization if inputTmx is true
-	if (inputTmx==1){
+	if (inputTmx == 1){
 		memcpy(h_affInitial, iTmx, NDIM*sizeof(float));
 	}
 	else if (inputTmx == 2){
 		// initial transform matrix
 		//			1	0	0	a
 		// h_aff =  0	1	0	b
-		//			0	0	1	c	
+		//			0	0	1	c
 		for (int j = 0; j < NDIM; j++) h_affInitial[j] = 0;
 		h_affInitial[0] = 1;
 		h_affInitial[5] = 1;
@@ -1156,12 +1160,65 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 		shiftXYZ[0] = shiftXYZ[1] = shiftXYZ[2] = 0;
 		float *regRecordsTemp = (float *)malloc(11 * sizeof(float));
 		int regStatus = reg_3dphasetransgpu(&shiftXYZ[0], h_img1, h_img2, &imSize1[0], &imSize2[0], 2, deviceNum, regRecordsTemp);
-		h_affInitial[3] = float(shiftXYZ[0]);
-		h_affInitial[7] = float(shiftXYZ[1]);
-		h_affInitial[11] = float(shiftXYZ[2]);
-		printf("...phase translation, X: %d; Y: %d; Z: %d\n", shiftXYZ[0], shiftXYZ[1], shiftXYZ[2]);
+		h_affInitial[3] = -(float)shiftXYZ[0];
+		h_affInitial[7] = -(float)shiftXYZ[1];
+		h_affInitial[11] = -(float)shiftXYZ[2];
+		printf("...phase translation, X: %f; Y: %f; Z: %f\n", h_affInitial[3], h_affInitial[7], h_affInitial[11]);
 		free(regRecordsTemp);
-		memcpy(h_affInitial, iTmx, NDIM*sizeof(float));
+		//memcpy(iTmx, h_affInitial, NDIM*sizeof(float));
+	}
+	else if (inputTmx == 3){
+		float *tmx1 = (float *)malloc(6 * sizeof(float));
+		float *tmx2 = (float *)malloc(6 * sizeof(float));
+		int img2DSizeMax1 = ((imx1 * imy1) > (imz1 * imx1)) ? (imx1 * imy1) : (imz1 * imx1);
+		int img2DSizeMax2 = ((imx2 * imy2) > (imz2 * imx2)) ? (imx2 * imy2) : (imz2 * imx2);
+		int img2DSizeMax = (img2DSizeMax1 > img2DSizeMax2) ? img2DSizeMax1 : img2DSizeMax2;
+		float *h_img2D1 = (float *)malloc(img2DSizeMax1 * sizeof(float));
+		float *h_img2D2 = (float *)malloc(img2DSizeMax2 * sizeof(float));
+		float *h_img2Dreg = (float *)malloc(img2DSizeMax1 * sizeof(float));
+		float *regRecords2D = (float *)malloc(11 * sizeof(float));
+		float *d_img2DMax = NULL;
+		cudaMalloc((void **)&d_img2DMax, img2DSizeMax*sizeof(float));
+		//cudaMalloc((void **)&d_img3D, totalSizeMax *sizeof(float));
+		int shiftX = (imx2 - imx1) / 2, shiftY = (imy2 - imy1) / 2, shiftZ = (imz2 - imz1) / 2;
+		int flag2Dreg = 1;
+		switch (flag2Dreg){
+		case 1:
+			tmx1[0] = 1; tmx1[1] = 0; tmx1[2] = shiftX;
+			tmx1[3] = 0; tmx1[4] = 1; tmx1[5] = shiftY;
+			cudaMemcpy(d_img3D, h_img1, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
+			maxprojection(d_img2DMax, d_img3D, imx1, imy1, imz1, 1);
+			cudaMemcpy(h_img2D1, d_img2DMax, imx1 * imy1 * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(d_img3D, h_img2, totalSize2 * sizeof(float), cudaMemcpyHostToDevice);
+			maxprojection(d_img2DMax, d_img3D, imx2, imy2, imz2, 1);
+			cudaMemcpy(h_img2D2, d_img2DMax, imx2 * imy2 * sizeof(float), cudaMemcpyDeviceToHost);
+			(void)reg_2dshiftaligngpu(h_img2Dreg, tmx1, h_img2D1, h_img2D2, imx1, imy1, imx2, imy2,
+				0, 0.3, 15, deviceNum, regRecords2D);
+			shiftX = tmx1[2];
+			shiftY = tmx1[5];
+
+			tmx2[0] = 1; tmx2[1] = 0; tmx2[2] = shiftZ;
+			tmx2[3] = 0; tmx2[4] = 1; tmx2[5] = shiftX;
+			cudaMemcpy(d_img3D, h_img1, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
+			maxprojection(d_img2DMax, d_img3D, imx1, imy1, imz1, 2);
+			cudaMemcpy(h_img2D1, d_img2DMax, imz1 * imx1 * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(d_img3D, h_img2, totalSize2 * sizeof(float), cudaMemcpyHostToDevice);
+			maxprojection(d_img2DMax, d_img3D, imx2, imy2, imz2, 2);
+			cudaMemcpy(h_img2D2, d_img2DMax, imx2 * imz2 * sizeof(float), cudaMemcpyDeviceToHost);
+			(void)reg_2dshiftalignXgpu(h_img2Dreg, tmx2, h_img2D1, h_img2D2, imz1, imx1, imz2, imx2,
+				1, 0.3, 15, deviceNum, regRecords2D);
+			shiftZ = tmx2[2];
+			h_affInitial[3] = shiftX;
+			h_affInitial[7] = shiftY;
+			h_affInitial[11] = shiftZ;
+			printf("...shift translation, X: %f; Y: %f; Z: %f\n", h_affInitial[3], h_affInitial[7], h_affInitial[11]);
+			break;
+		default:
+			break;
+		}
+		//cudaFree(d_img3D); 
+		cudaFree(d_img2DMax);
+		free(tmx1); free(tmx2); free(h_img2D1); free(h_img2D2); free(h_img2Dreg);
 	}
 	else{
 		// initial transform matrix
@@ -1176,6 +1233,18 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 		h_affInitial[7] = (imy2 - imy1) / 2;
 		h_affInitial[11] = (imz2 - imz1) / 2;
 	}
+
+	//****** 3D registration begains********///
+	//calculate corrDenominator
+	// transfer target image into GPU memory
+	if (subBgTrigger)
+		cudaMemcpy(d_img3D, h_imgE, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
+	else
+		cudaMemcpy(d_img3D, h_img1, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
+	cudaCheckErrors("image1 memcpy fail");
+	multi3Dgpu(d_img3D, d_img3D, d_img3D, imx1, imy1, imz1);
+	sumSqr1 = sum3Dgpu(d_img3D, d_2D, h_2D, imx1, imy1, imz1);
+	corrDenominator = sqrt(sumSqr1);
 	/// calculate initial cost function value and time cost for each sub iteration
 	if (subBgTrigger)
 		cudaMemcpy(d_img3D, h_imgE, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
@@ -1189,6 +1258,7 @@ int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	dof9Flag = false;
 	matrix2p(h_affInitial, p);
 	regRecords[4] = costfunc(p);
+	printf("...initial cost fun: %f;\n", regRecords[4]);
 	endTemp = clock();
 	regRecords[9] = (float)(endTemp - startTemp);
 
@@ -1664,8 +1734,8 @@ int reg_3dcpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned 
 	return 0;
 }
 ///// 3D deconlution
-int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *h_psf, float *h_psf_bp, unsigned int *psfSize, 
-	int itNumForDecon, int deviceNum, int gpuMemMode, float *deconRecords){
+int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *h_psf, unsigned int *psfSize, 
+	int itNumForDecon, int deviceNum, int gpuMemMode, float *deconRecords, bool flagUnmatch, float *h_psf_bp){
 	// gpuMemMode --> 0: Automatically set memory mode based on calculations; 1: sufficient memory; 2: memory optimized.
 	//deconRecords: 10 elements
 	//[0]:  the actual GPU memory mode used;
@@ -1790,14 +1860,20 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
 		mySumPSF = sumcpu(h_psf, totalSizePSF);
 		multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		if (!flagUnmatch){ // traditional backprojector matched PSF 
+			flipPSF(d_StackA, d_StackE, PSFx, PSFy, PSFz); // flip PSF
+			cudaMemcpy(h_psf_bp, d_StackA, totalSizePSF* sizeof(float), cudaMemcpyDeviceToHost);
+		}
 		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
 		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz); 		
 		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_PSFSpectrum);
 		//PSF bp
 		cudaMemcpy(d_StackE, h_psf_bp, totalSizePSF* sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
-		mySumPSF = sumcpu(h_psf_bp, totalSizePSF);
-		multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		if (flagUnmatch){
+			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+			mySumPSF = sumcpu(h_psf_bp, totalSizePSF);
+			multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		}
 		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
 		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
 		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_FlippedPSFSpectrum);
@@ -1856,15 +1932,21 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
 		mySumPSF = sumcpu(h_psf, totalSizePSF);
 		multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		if (!flagUnmatch){ // traditional backprojector matched PSF 
+			flipPSF(d_StackA, d_StackE, PSFx, PSFy, PSFz); // flip PSF
+			cudaMemcpy(h_psf_bp, d_StackA, totalSizePSF* sizeof(float), cudaMemcpyDeviceToHost);
+		}
 		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
 		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
 		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_StackESpectrum);
 		cudaMemcpy(h_PSFSpectrum, d_StackESpectrum, totalSizeSpectrum*sizeof(fComplex), cudaMemcpyDeviceToHost);
 		//PSF bp
 		cudaMemcpy(d_StackE, h_psf_bp, totalSizePSF* sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
-		mySumPSF = sumcpu(h_psf_bp, totalSizePSF);
-		multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		if (flagUnmatch){
+			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+			mySumPSF = sumcpu(h_psf_bp, totalSizePSF);
+			multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		}
 		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
 		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
 		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_StackESpectrum);
@@ -3475,9 +3557,598 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 	return 0;
 }
 
-int decon_singleview_batch(float *h_decon, float *h_img, unsigned int *imSize, float *h_psf, float *h_psf_bp, unsigned int *psfSize,
-	int itNumForDecon, int deviceNum, int gpuMemMode, float *deconRecords){
+int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePrefix, int imgNumStart, int imgNumEnd, int imgNumInterval,  char *filePSF,
+	int itNumForDecon, int deviceNum, int bitPerSample, bool flagMultiColor, float *records, bool flagUnmatch, char *filePSF_bp){
+	//deconRecords: 10 elements
+	char *outFolder, *inFolder;
+	char mainFolder[MAX_PATH];
+	int subFolderCount = 1;
+	char subFolderNames[20][MAX_PATH];
+	if (flagMultiColor){ // trigger multiple color
+#ifdef _WIN32 
+		strcpy(mainFolder, folder);
+#else
+		fprintf(stderr, "*** Multi-color processing is currently not supported on Linux\n");
+#endif
+	}
+	if (flagMultiColor){
+		subFolderCount = findSubFolders(&subFolderNames[0][0], mainFolder);
 
+		if (subFolderCount > 20)
+			fprintf(stderr, "*** Number of subfolders: %d; two many subfolders\n", subFolderCount);
+		else{
+			printf("Procecing multicolor data: %d colors\n", subFolderCount);
+			for (int j = 0; j < subFolderCount; j++)
+				printf("...Subfolders %d: %s\n", j + 1, &subFolderNames[j][0]);
+		}
+		inFolder = concat(3, mainFolder, &subFolderNames[0][0], "/");
+	}
+	else{
+		inFolder = folder;
+	}
+	//************get basic input images and PSFs information ******************
+	unsigned int  imSize[3], imSizeTemp[3], psfSize[3];
+	int imgNum = imgNumStart;
+	char imgNumStr[20];
+	sprintf(imgNumStr, "%d", imgNum);
+	char *fileStack = concat(4, inFolder, fileNamePrefix, imgNumStr, ".tif"); // TIFF file to get image information
+	//**** check image files and image size ***
+	unsigned short bitPerSample_input;
+	if (!fexists(fileStack)){
+		fprintf(stderr, "***File does not exist: %s\n", fileStack);
+		fprintf(stderr, "*** FAILED - ABORTING\n");
+		exit(1);
+	}
+	if (!fexists(filePSF)){
+		fprintf(stderr, "***File does not exist: %s\n", filePSF);
+		fprintf(stderr, "*** FAILED - ABORTING\n");
+		exit(1);
+	}
+	if (flagUnmatch){// use unmatched back projectors
+		if (!fexists(filePSF_bp)){
+			fprintf(stderr, "***File does not exist: %s\n", filePSF_bp);
+			fprintf(stderr, "*** FAILED - ABORTING\n");
+			exit(1);
+		}
+	}
+
+	bitPerSample_input = gettifinfo(fileStack, &imSize[0]);
+	if (bitPerSample_input != 16 && bitPerSample_input != 32){
+		fprintf(stderr, "***Input images are not supported, please use 16-bit or 32-bit image !!!\n");
+		fprintf(stderr, "*** FAILED - ABORTING\n");
+		exit(1);
+	}
+	(void)gettifinfo(filePSF, &psfSize[0]);
+	if (flagUnmatch){
+		(void)gettifinfo(filePSF_bp, &imSizeTemp[0]);
+		if ((psfSize[0] != imSizeTemp[0]) || (psfSize[1] != imSizeTemp[1]) || (psfSize[2] != imSizeTemp[2])){
+			fprintf(stderr, "***PSF and PSF_bp image size are not consistent to each other !!!\n");
+			fprintf(stderr, "*** FAILED - ABORTING\n");
+			exit(1);
+		}
+	}
+
+	//****************** Create output folders*****************//
+	char *deconFolder;
+	// flagSaveProjZ --> 1: save max projections; 0: not.
+	if (flagMultiColor){
+		CreateDirectory(outMainFolder, NULL);
+		for (int j = 0; j < subFolderCount; j++){
+			outFolder = concat(3, outMainFolder, &subFolderNames[j][0], "/");
+			inFolder = concat(3, mainFolder, &subFolderNames[j][0], "/");
+			deconFolder = concat(2, outFolder, "Decon/");
+			CreateDirectory(outFolder, NULL);
+			CreateDirectory(deconFolder, NULL);
+			free(outFolder); free(inFolder); free(deconFolder);
+		}
+	}
+	else{
+		outFolder = outMainFolder;
+		inFolder = folder;
+		deconFolder = concat(2, outFolder, "Decon/");
+#ifdef _WIN32 
+		CreateDirectory(outFolder, NULL);
+		CreateDirectory(deconFolder, NULL);
+#else
+		mkdir(outFolder, 0755);
+		mkdir(deconFolder, 0755);
+#endif
+	}
+
+	//****************** calculate images' size *************************//
+	int imx, imy, imz;
+	imx = imSize[0]; imy = imSize[1]; imz = imSize[2]; // also as output size
+
+	// PSF size
+	int
+		PSFx, PSFy, PSFz;
+	PSFx = psfSize[0], PSFy = psfSize[1], PSFz = psfSize[2];
+
+	//FFT size
+	int
+		FFTx, FFTy, FFTz,
+		PSFox, PSFoy, PSFoz,
+		imox, imoy, imoz;
+
+	FFTx = snapTransformSize(imx);// snapTransformSize(imx + PSFx - 1);
+	FFTy = snapTransformSize(imy);// snapTransformSize(imy + PSFy - 1);
+	FFTz = snapTransformSize(imz);// snapTransformSize(imz + PSFz - 1);
+
+	PSFox = round(PSFx / 2);
+	PSFoy = round(PSFy / 2);
+	PSFoz = round(PSFz / 2);
+	imox = round((FFTx - imSize[0]) / 2);
+	imoy = round((FFTy - imSize[1]) / 2);
+	imoz = round((FFTz - imSize[2]) / 2);
+
+	// total pixel count for each images
+	int totalSize = imx*imy*imz; // in floating format
+	int totalSizePSF = PSFx*PSFy*PSFz; // in floating format
+	int totalSizeFFT = FFTx*FFTy*FFTz; // in floating format
+	int totalSizeSpectrum = FFTx * FFTy*(FFTz / 2 + 1); // in complex floating format
+	int totalSizeMax = totalSizeSpectrum * 2; // in floating format
+	int totalSizeMax2 = totalSizeMax > totalSizePSF ? totalSizeMax : totalSizePSF; // in floating format: in case PSF has a larger size
+
+
+	float
+		*h_StackA,
+		*h_StackE,
+		*d_StackA,
+		*d_StackE,
+		*d_StackT;
+	float
+		*h_img,
+		*h_decon,
+		*h_psf,
+		*h_psf_bp;
+
+	fComplex
+		*h_PSFSpectrum,
+		*h_FlippedPSFSpectrum,
+		*h_StackESpectrum,
+		*d_PSFSpectrum,
+		*d_FlippedPSFSpectrum,
+		*d_StackESpectrum;
+	cufftHandle
+		fftPlanFwd,
+		fftPlanInv;
+
+	// print GPU devices information
+	cudaSetDevice(deviceNum);
+	int gpuMemMode = 0;
+
+	// Log file
+	FILE *f1 = NULL;
+	char *fileLog = concat(2, outMainFolder, "ProcessingLog.txt");
+
+	// print images information
+	printf("Image information:\n");
+	printf("...Image size %d x %d x %d\n ", imSize[0], imSize[1], imSize[2]);
+	printf("...PSF size %d x %d x %d\n", psfSize[0], psfSize[1], psfSize[2]);
+	printf("...FFT size: %d x %d x %d\n", FFTx, FFTy, FFTz);
+	printf("...Output Image size %d x %d x %d \n\n", imSize[0], imSize[1], imSize[2]);
+	printf("...Image number from %d to %d with step %d\n", imgNumStart, imgNumEnd, imgNumInterval);
+
+	if (flagUnmatch) printf("\n...Unmatched back projectors for deconvolution: yes\n");
+	else printf("\n...Unmatched back projectors for deconvolution: no\n");
+	printf("\n...Iteration number for deconvolution:%d\n", itNumForDecon);
+	printf("\n...GPU Device %d is used...\n\n", deviceNum);
+
+	time_t now;
+	time(&now);
+	//****Write information to log file***
+	f1 = fopen(fileLog, "w");
+	// print images information
+	fprintf(f1, "Single-view Deconvolution: %s\n", ctime(&now));
+	if (flagMultiColor){
+		fprintf(f1, "Multicolor data: %d colors\n", subFolderCount);
+		fprintf(f1, "...Input directory: %s\n", folder);
+		for (int j = 0; j < subFolderCount; j++)
+			fprintf(f1, "     ...Subfolders %d: %s\n", j + 1, &subFolderNames[j][0]);
+		fprintf(f1, "...Output directory: %s\n", outMainFolder);
+	}
+	else{
+		fprintf(f1, "Single color data:\n");
+		fprintf(f1, "...Input directory: %s\n", folder);
+		fprintf(f1, "...Output directory: %s\n", outMainFolder);
+	}
+
+	fprintf(f1, "\nImage information:\n");
+	fprintf(f1, "...Image size %d x %d x %d\n", imSize[0], imSize[1], imSize[2]);
+	fprintf(f1, "...PSF size %d x %d x %d\n", psfSize[0], psfSize[1], psfSize[2]);
+	fprintf(f1, "...FFT size: %d x %d x %d\n", FFTx, FFTy, FFTz);
+	fprintf(f1, "...Output Image size %d x %d x %d \n\n", imSize[0], imSize[1], imSize[2]);
+	fprintf(f1, "...Image number from %d to %d with step %d\n", imgNumStart, imgNumEnd, imgNumInterval);
+	if (flagUnmatch) fprintf(f1, "\n...Unmatched back projectors for deconvolution: yes\n");
+	else fprintf(f1, "\n...Unmatched back projectors for deconvolution: no\n");
+	fprintf(f1, "...Iteration number for deconvolution:%d\n", itNumForDecon);
+	fprintf(f1, "\n...GPU Device %d is used...\n\n", deviceNum);
+	fclose(f1);
+	//****************** Processing Starts*****************//
+	// variables for memory and time cost records
+	clock_t startWhole, endWhole;
+	size_t totalMem = 0;
+	size_t freeMem = 0;
+	clock_t start, time1, time2, time3, time4, end;
+	time1 = time2 = time3 = end = 0;
+	start = clock();
+	printf("\nStart processing...\n");
+	cudaMemGetInfo(&freeMem, &totalMem);
+	printf("...GPU free memory at beginning is %.0f MBites\n", (float)freeMem / 1048576.0f);
+	f1 = fopen(fileLog, "a");
+	fprintf(f1, "\nStart processing...\n");
+	fprintf(f1, "...GPU free memory at beginning is %.0f MBites\n", (float)freeMem / 1048576.0f);
+	fclose(f1);
+
+	//****************** Processing Starts*****************//
+	// variables for memory and time cost records
+	
+	// allocate memory
+	cudaMemGetInfo(&freeMem, &totalMem);
+	printf("...GPU free memory(at beginning) is %.0f MBites\n", (float)freeMem / 1048576.0f);
+	records[1] = (float)freeMem / 1048576.0f;
+	cudaMalloc((void **)&d_StackA, totalSizeMax2 *sizeof(float));
+	cudaMalloc((void **)&d_StackE, totalSizeMax2 *sizeof(float));
+	cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
+	cudaMemset(d_StackE, 0, totalSizeMax2*sizeof(float));
+	//check GPU status
+	cudaCheckErrors("****Memory allocating fails... GPU out of memory !!!!*****");
+	// Create FFT plans
+	cufftPlan3d(&fftPlanFwd, FFTx, FFTy, FFTz, CUFFT_R2C);
+	cufftPlan3d(&fftPlanInv, FFTx, FFTy, FFTz, CUFFT_C2R);
+	cudaCheckErrors("****Memory allocating fails... GPU out of memory !!!!*****");
+
+	cudaMemGetInfo(&freeMem, &totalMem);
+	printf("...GPU free memory(after partially mallocing) is %.0f MBites\n", (float)freeMem / 1048576.0f);
+	records[2] = (float)freeMem / 1048576.0f;
+
+	h_img = (float *)malloc(totalSize * sizeof(float));
+	h_psf = (float *)malloc(totalSizePSF * sizeof(float));
+	h_psf_bp = (float *)malloc(totalSizePSF * sizeof(float));
+	h_decon = (float *)malloc(totalSize * sizeof(float));
+	// ***read PSFs ***
+	readtifstack(h_psf, filePSF, &psfSize[0]);
+	if (flagUnmatch){
+		readtifstack(h_psf_bp, filePSF_bp, &psfSize[0]);
+	}
+	// ***** Set GPU memory use mode based on images size and available GPU memory ****
+	// gpuMemMode --> Unified memory in next version???
+	// 0: Automatically set memory mode based on calculations; 
+	// 1: sufficient memory; 2: memory optimized.
+	if (gpuMemMode == 0){ //Automatically set memory mode based on calculations.
+		if (freeMem > 4 * totalSizeMax * sizeof(float)){ // 7 more GPU variables
+			gpuMemMode = 1;
+			printf("\n GPU memory is sufficient, processing in efficient mode !!!\n");
+		}
+		else {// no more GPU variables needed
+			gpuMemMode = 2;
+			printf("\n GPU memory is optimized, processing in memory saved mode !!!\n");
+		}
+	}
+	records[0] = gpuMemMode;
+	double mySumPSF = 0;
+	switch(gpuMemMode){
+	case 1:// efficient GPU calculation
+		cudaMalloc((void **)&d_StackT, totalSizeFFT *sizeof(float));
+		cudaMalloc((void **)&d_PSFSpectrum, totalSizeSpectrum*sizeof(fComplex));
+		cudaMalloc((void **)&d_FlippedPSFSpectrum, totalSizeSpectrum*sizeof(fComplex));
+		cudaMalloc((void **)&d_StackESpectrum, totalSizeSpectrum*sizeof(fComplex));
+		cudaMemGetInfo(&freeMem, &totalMem);
+		printf("...GPU free memory(after mallocing) is %.0f MBites\n", (float)freeMem / 1048576.0f);
+		// *** PSF Preparation
+		//PSF 
+		cudaMemcpy(d_StackE, h_psf, totalSizePSF* sizeof(float), cudaMemcpyHostToDevice);
+		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+		mySumPSF = sumcpu(h_psf, totalSizePSF);
+		multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		if (!flagUnmatch){ // traditional backprojector matched PSF 
+			flipPSF(d_StackA, d_StackE, PSFx, PSFy, PSFz); // flip PSF
+			cudaMemcpy(h_psf_bp, d_StackA, totalSizePSF* sizeof(float), cudaMemcpyDeviceToHost);
+		}
+		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
+		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
+		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_PSFSpectrum);
+		//PSF bp
+		cudaMemcpy(d_StackE, h_psf_bp, totalSizePSF* sizeof(float), cudaMemcpyHostToDevice);
+		if (flagUnmatch){
+			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+			mySumPSF = sumcpu(h_psf_bp, totalSizePSF);
+			multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		}
+		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
+		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
+		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_FlippedPSFSpectrum);
+
+		// ******processing in batch*************
+		for (imgNum = imgNumStart; imgNum <= imgNumEnd; imgNum += imgNumInterval){
+			printf("\n***Image time point number: %d \n", imgNum);
+			f1 = fopen(fileLog, "a");
+			fprintf(f1, "\n***Image time point number: %d \n", imgNum);
+			fclose(f1);
+			sprintf(imgNumStr, "%d", imgNum);
+			char *fileStack, *fileDecon;
+			for (int iColor = 0; iColor < subFolderCount; iColor++){
+				time1 = clock();
+				if (flagMultiColor){
+					printf("\n Processing time point %d color %d: %s \n", imgNum, iColor + 1, &subFolderNames[iColor][0]);
+					f1 = fopen(fileLog, "a");
+					fprintf(f1, "\n Processing time point %d color %d: %s \n", imgNum, iColor + 1, &subFolderNames[iColor][0]);
+					fclose(f1);
+					outFolder = concat(3, outMainFolder, &subFolderNames[iColor][0], "/");
+					inFolder = concat(3, mainFolder, &subFolderNames[iColor][0], "/");
+					deconFolder = concat(2, outFolder, "Decon/");
+				}
+				fileStack = concat(4, inFolder, fileNamePrefix, imgNumStr, ".tif");
+				fileDecon = concat(4, deconFolder, "Decon_", imgNumStr, ".tif");
+
+				//****************Interpolation before registration****************//////
+				// ## check files
+				if (!fexists(fileStack)){
+					printf("***File does not exist: %s", fileStack);
+					return 0;
+				}
+				else
+					readtifstack(h_img, fileStack, &imSize[0]);
+				cudaMemcpy(d_StackA, h_img, totalSize* sizeof(float), cudaMemcpyHostToDevice);
+				//eliminate 0 in stacks
+				maxvalue3Dgpu(d_StackA, d_StackA, (float)(SMALLVALUE), imx, imy, imz);
+				changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, 1); //1: change tiff storage order to C storage order
+				padStack(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
+				// initialize estimation
+				cudaMemcpy(d_StackE, d_StackA, totalSizeFFT* sizeof(float), cudaMemcpyDeviceToDevice);
+				cudaCheckErrors("image preparing fail");
+				//printf("...Initializing deconvolution iteration...\n");
+				time2 = clock();
+				for (int itNum = 1; itNum <= itNumForDecon; itNum++){
+					// ### iterate with StackA and PSFA///////////////////
+					// convolve StackE with PSFA
+					//printf("...Processing iteration %d\n", it);
+					cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackE, (cufftComplex *)d_StackESpectrum);
+					multicomplex3Dgpu(d_StackESpectrum, d_StackESpectrum, d_PSFSpectrum, FFTx, FFTy, (FFTz / 2 + 1));
+					cufftExecC2R(fftPlanInv, (cufftComplex *)d_StackESpectrum, (cufftReal *)d_StackT);
+					// divid StackA by StackTemp
+					div3Dgpu(d_StackT, d_StackA, d_StackT, FFTx, FFTy, FFTz);   //// div3Dgpu does not work
+					// convolve StackTemp with FlippedPSFA
+					cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackT, (cufftComplex *)d_StackESpectrum);
+					multicomplex3Dgpu(d_StackESpectrum, d_StackESpectrum, d_FlippedPSFSpectrum, FFTx, FFTy, (FFTz / 2 + 1));
+					cufftExecC2R(fftPlanInv, (cufftComplex *)d_StackESpectrum, (cufftReal *)d_StackT);//test
+					// multiply StackE and StackTemp
+					multi3Dgpu(d_StackE, d_StackE, d_StackT, FFTx, FFTy, FFTz);//
+					maxvalue3Dgpu(d_StackE, d_StackE, float(SMALLVALUE), FFTx, FFTy, FFTz);
+				}
+				time3 = clock();
+				cropStack(d_StackE, d_StackT, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
+				//printf("...Deconvolution completed ! ! !\n");
+				cudaThreadSynchronize();
+				changestorageordergpu(d_StackE, d_StackT, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
+				cudaMemcpy(h_decon, d_StackE, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
+				writetifstack(fileDecon, h_decon, &imSize[0], bitPerSample);//set bitPerSample as input images
+
+				time4 = clock();
+				cudaMemGetInfo(&freeMem, &totalMem);
+				printf("...GPU free memory (during processing) is %.0f MBites\n", (float)freeMem / 1048576.0f);
+				records[4] = (float)freeMem / 1048576.0f;
+
+				time4 = clock();
+				cudaMemGetInfo(&freeMem, &totalMem);
+				printf("...GPU free memory (during processing) is %.0f MBites\n", (float)freeMem / 1048576.0f);
+				records[4] = (float)freeMem / 1048576.0f;
+
+				gpuMemMode = int(records[0]);
+				switch (gpuMemMode){
+				case 1:
+					printf("	...Sufficient GPU memory, running in efficient mode !!!\n");
+					break;
+				case 2:
+					printf("	...GPU memory optimized, running in memory saved mode !!!\n");
+					break;
+
+				default:
+					printf("	...Not enough GPU memory, no deconvolution performed !!!\n");
+				}
+				printf("	...GPU free memory during deconvolution is %.0f MBites\n", records[4]);
+				printf("	...all iteration time cost: %2.3f s\n", (float)(time3 - time2) / CLOCKS_PER_SEC);
+				printf("	...time cost for current image: %2.3f s\n", (float)(time4 - time1) / CLOCKS_PER_SEC);
+
+				f1 = fopen(fileLog, "a");
+				switch (gpuMemMode){
+				case 1:
+					fprintf(f1, "	...Sufficient GPU memory, running in efficient mode !!!\n");
+					break;
+				case 2:
+					fprintf(f1, "	...GPU memory optimized, running in memory saved mode !!!\n");
+					break;
+				default:
+					fprintf(f1, "	...Not enough GPU memory, no deconvolution performed !!!\n");
+				}
+				fprintf(f1, "	...GPU free memory (during processing) is %.0f MBites\n", records[4]);
+				fprintf(f1, "	... time cost for current image: %2.3f s\n", (float)(time4 - time1) / CLOCKS_PER_SEC);
+				fclose(f1);
+			}
+		}
+		// release CUDA variables
+		cudaFree(d_StackT); cudaFree(d_PSFSpectrum); cudaFree(d_FlippedPSFSpectrum); cudaFree(d_StackESpectrum);
+		break;
+	case 2:
+		time1 = clock();
+		h_StackA = (float *)malloc(totalSizeMax * sizeof(float));
+		h_StackE = (float *)malloc(totalSizeMax * sizeof(float));
+		h_PSFSpectrum = (fComplex *)malloc(totalSizeSpectrum*sizeof(fComplex));
+		h_FlippedPSFSpectrum = (fComplex *)malloc(totalSizeSpectrum*sizeof(fComplex));
+		h_StackESpectrum = (fComplex *)malloc(totalSizeSpectrum*sizeof(fComplex));
+		d_StackESpectrum = (fComplex *)d_StackE; // share the same physic memory
+		// *** PSF Preparation
+		//PSF 
+		cudaMemcpy(d_StackE, h_psf, totalSizePSF* sizeof(float), cudaMemcpyHostToDevice);
+		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+		mySumPSF = sumcpu(h_psf, totalSizePSF);
+		multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		if (!flagUnmatch){ // traditional backprojector matched PSF 
+			flipPSF(d_StackA, d_StackE, PSFx, PSFy, PSFz); // flip PSF
+			cudaMemcpy(h_psf_bp, d_StackA, totalSizePSF* sizeof(float), cudaMemcpyDeviceToHost);
+		}
+		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
+		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
+		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_StackESpectrum);
+		cudaMemcpy(h_PSFSpectrum, d_StackESpectrum, totalSizeSpectrum*sizeof(fComplex), cudaMemcpyDeviceToHost);
+		//PSF bp
+		cudaMemcpy(d_StackE, h_psf_bp, totalSizePSF* sizeof(float), cudaMemcpyHostToDevice);
+		if (flagUnmatch){
+			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+			mySumPSF = sumcpu(h_psf_bp, totalSizePSF);
+			multivaluegpu(d_StackE, d_StackA, (float)(1 / mySumPSF), PSFx, PSFy, PSFz); // normalize PSF sum to 1
+		}
+		cudaMemset(d_StackA, 0, totalSizeMax2*sizeof(float));
+		padPSF(d_StackA, d_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
+		cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_StackESpectrum);
+		cudaMemcpy(h_FlippedPSFSpectrum, d_StackESpectrum, totalSizeSpectrum*sizeof(fComplex), cudaMemcpyDeviceToHost);
+
+		// ******processing in batch*************
+		for (imgNum = imgNumStart; imgNum <= imgNumEnd; imgNum += imgNumInterval){
+			printf("\n***Image time point number: %d \n", imgNum);
+			f1 = fopen(fileLog, "a");
+			fprintf(f1, "\n***Image time point number: %d \n", imgNum);
+			fclose(f1);
+			sprintf(imgNumStr, "%d", imgNum);
+			char *fileStack, *fileDecon;
+			for (int iColor = 0; iColor < subFolderCount; iColor++){
+				time1 = clock();
+				if (flagMultiColor){
+					printf("\n Processing time point %d color %d: %s \n", imgNum, iColor + 1, &subFolderNames[iColor][0]);
+					f1 = fopen(fileLog, "a");
+					fprintf(f1, "\n Processing time point %d color %d: %s \n", imgNum, iColor + 1, &subFolderNames[iColor][0]);
+					fclose(f1);
+					outFolder = concat(3, outMainFolder, &subFolderNames[iColor][0], "/");
+					inFolder = concat(3, mainFolder, &subFolderNames[iColor][0], "/");
+					deconFolder = concat(2, outFolder, "Decon/");
+				}
+				fileStack = concat(4, inFolder, fileNamePrefix, imgNumStr, ".tif");
+				fileDecon = concat(4, deconFolder, "Decon_", imgNumStr, ".tif");
+
+				//****************Interpolation before registration****************//////
+				// ## check files
+				if (!fexists(fileStack)){
+					printf("***File does not exist: %s", fileStack);
+					return 0;
+				}
+				else
+					readtifstack(h_img, fileStack, &imSize[0]);
+				cudaMemcpy(d_StackA, h_img, totalSize* sizeof(float), cudaMemcpyHostToDevice);
+				//eliminate 0 in stacks
+				maxvalue3Dgpu(d_StackA, d_StackA, (float)(SMALLVALUE), imx, imy, imz);
+				changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, 1); //1: change tiff storage order to C storage order
+				padStack(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
+
+				// initialize estimation
+				cudaMemcpy(h_StackA, d_StackA, totalSizeFFT * sizeof(float), cudaMemcpyDeviceToHost);
+				cudaMemcpy(h_StackE, d_StackA, totalSizeFFT * sizeof(float), cudaMemcpyDeviceToHost);
+
+				d_PSFSpectrum = (fComplex *)d_StackA; // share the same physic memory
+				d_FlippedPSFSpectrum = (fComplex *)d_StackA; // share the same physic memory
+				cudaCheckErrors("image preparing fail");
+				//printf("...Initializing deconvolution iteration...\n");
+				time2 = clock();
+				for (int itNum = 1; itNum <= itNumForDecon; itNum++){
+					// ### iterate with StackA and PSFA///////////////////
+					// convolve StackE with PSFA
+					//printf("...Processing iteration %d\n", it);
+					cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_StackESpectrum);
+					cudaMemcpy(d_PSFSpectrum, h_PSFSpectrum, totalSizeSpectrum*sizeof(fComplex), cudaMemcpyHostToDevice);
+					multicomplex3Dgpu(d_StackESpectrum, d_StackESpectrum, d_PSFSpectrum, FFTx, FFTy, (FFTz / 2 + 1));
+					cufftExecC2R(fftPlanInv, (cufftComplex *)d_StackESpectrum, (cufftReal *)d_StackA);
+
+					// divid StackA by StackTemp
+					cudaMemcpy(d_StackE, h_StackA, totalSizeFFT* sizeof(float), cudaMemcpyHostToDevice);
+					div3Dgpu(d_StackA, d_StackE, d_StackA, FFTx, FFTy, FFTz);   //// div3Dgpu does not work
+					// convolve StackTemp with FlippedPSFA
+					cufftExecR2C(fftPlanFwd, (cufftReal *)d_StackA, (cufftComplex *)d_StackESpectrum);
+					cudaMemcpy(d_FlippedPSFSpectrum, h_FlippedPSFSpectrum, totalSizeSpectrum*sizeof(fComplex), cudaMemcpyHostToDevice);
+					multicomplex3Dgpu(d_StackESpectrum, d_StackESpectrum, d_FlippedPSFSpectrum, FFTx, FFTy, (FFTz / 2 + 1));
+					cufftExecC2R(fftPlanInv, (cufftComplex *)d_StackESpectrum, (cufftReal *)d_StackA);//test
+					// multiply StackE and StackTemp
+					cudaMemcpy(d_StackE, h_StackE, totalSizeFFT* sizeof(float), cudaMemcpyHostToDevice);
+					multi3Dgpu(d_StackA, d_StackE, d_StackA, FFTx, FFTy, FFTz);//
+					cudaMemcpy(h_StackE, d_StackA, totalSizeFFT* sizeof(float), cudaMemcpyDeviceToHost);
+				}
+				time3 = clock();
+				cropStack(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz, imox, imoy, imoz);//
+				//printf("...Deconvolution completed ! ! !\n");
+				cudaThreadSynchronize();
+				//## Write stack to tiff image
+				changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
+				cudaMemcpy(h_decon, d_StackA, totalSize* sizeof(float), cudaMemcpyDeviceToHost);
+				writetifstack(fileDecon, h_decon, &imSize[0], bitPerSample);//set bitPerSample as input images
+
+				time4 = clock();
+				cudaMemGetInfo(&freeMem, &totalMem);
+				printf("...GPU free memory (during processing) is %.0f MBites\n", (float)freeMem / 1048576.0f);
+				records[4] = (float)freeMem / 1048576.0f;
+
+				gpuMemMode = int(records[0]);
+				switch (gpuMemMode){
+				case 1:
+					printf("	...Sufficient GPU memory, running in efficient mode !!!\n");
+					break;
+				case 2:
+					printf("	...GPU memory optimized, running in memory saved mode !!!\n");
+					break;
+
+				default:
+					printf("	...Not enough GPU memory, no deconvolution performed !!!\n");
+				}
+				printf("	...GPU free memory during deconvolution is %.0f MBites\n", records[4]);
+				printf("	...all iteration time cost: %2.3f s\n", (float)(time3 - time2) / CLOCKS_PER_SEC);
+				printf("	...time cost for current image: %2.3f s\n", (float)(time4 - time1) / CLOCKS_PER_SEC);
+
+				f1 = fopen(fileLog, "a");
+				switch (gpuMemMode){
+				case 1:
+					fprintf(f1, "	...Sufficient GPU memory, running in efficient mode !!!\n");
+					break;
+				case 2:
+					fprintf(f1, "	...GPU memory optimized, running in memory saved mode !!!\n");
+					break;
+				default:
+					fprintf(f1, "	...Not enough GPU memory, no deconvolution performed !!!\n");
+				}
+				fprintf(f1, "	...GPU free memory (during processing) is %.0f MBites\n", records[4]);
+				fprintf(f1, "	... time cost for current image: %2.3f s\n", (float)(time4 - time1) / CLOCKS_PER_SEC);
+				fclose(f1);
+			}
+		}
+		// release CPU memory
+		free(h_StackA);  free(h_StackE); free(h_PSFSpectrum); free(h_FlippedPSFSpectrum); free(h_StackESpectrum);
+		break;
+	default:
+		printf("\n****Wrong gpuMemMode setup, no deconvolution performed !!! ****\n");
+		f1 = fopen(fileLog, "a");
+		fprintf(f1, "\n****Wrong gpuMemMode setup, no deconvolution performed !!! ****\n");
+		fclose(f1);
+		return -1;
+	}
+	free(h_img);  free(h_psf); free(h_psf_bp); free(h_decon);
+	// release GPU memory
+	cudaFree(d_StackA);
+	cudaFree(d_StackE);
+	// destroy plans
+	cufftDestroy(fftPlanFwd);
+	cufftDestroy(fftPlanInv);
+	end = clock();
+	cudaMemGetInfo(&freeMem, &totalMem);
+	records[5] = (float)freeMem / 1048576.0f;
+	records[6] = (float)(time3 - time2) / CLOCKS_PER_SEC;
+	records[7] = (float)(time4 - time1) / CLOCKS_PER_SEC;
+	records[8] = (float)(time3 - time2) / CLOCKS_PER_SEC;
+	records[9] = (float)(end - start) / CLOCKS_PER_SEC;
+
+	printf("\nGPU free memory after whole processing is %.0f MBites\n", records[5]);
+	endWhole = clock();
+	printf("Total time cost for whole processing is %2.3f s\n", records[9]);
+	f1 = fopen(fileLog, "a");
+	fprintf(f1, "\nGPU free memory after whole processing is %.0f MBites\n", records[5]);
+	fprintf(f1, "Total time cost for whole processing is %2.3f s\n", records[9]);
+	fclose(f1);
+	return 0;
 }
 
 int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, char *fileNamePrefix1, char *fileNamePrefix2, int imgNumStart, int imgNumEnd, int imgNumInterval, int imgNumTest,
@@ -3485,7 +4156,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 	int itNumForDecon, int deviceNum, int *flagSaveInterFiles, int bitPerSample, float *records, bool flagUnmatch, char *filePSF_bp1, char *filePSF_bp2){ // Next version: variable arguments input
 	// regMode--> 0: no registration; 1: one image only
 	//			2: dependently, based on the results of last time point; 3: independently
-	// flagInitialTmx --> 0: default matrix; 1: input matrix; 2: 2D registration
+	// flagInitialTmx --> 0: default matrix; 1: input matrix; 2: do 3D translation registation based on phase registration.; 3: 2D registration
 	// flagSaveInterFiles: 8 elements --> 1: save files; 0: not; [0] is currently not used.
 	//					[0]: Intermediate outputs; [1]: reg A; [2]: reg B;
 	//					[3]- [5]: Decon max projections Z, Y, X;
@@ -4117,6 +4788,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 			iTmx[3] = shiftX;
 			iTmx[7] = shiftY;
 			iTmx[11] = shiftZ;
+			printf("...shift translation, X: %f; Y: %f; Z: %f\n", shiftX, shiftY, shiftZ);
 			if ((regMode == 1) || (regMode == 2)) flagInitialTmx = 1; // perform 2D reg only one time
 			free(tmx1); free(tmx2); free(h_img2D1); free(h_img2D2); free(h_img2Dreg); free(regRecords2D);
 		}
@@ -4145,6 +4817,11 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 		case 1:
 			regStatus = reg_3dgpu(h_reg, iTmx, h_StackA, h_StackB, imSize, imSize2, regMethod,
 				inputTmx, FTOL, itLimit, subBgTrigger, deviceNum, regRecords);
+			mStatus = checkmatrix(iTmx);//if registration is good
+			if (!mStatus){ // repeat with different initial matrix 
+				regStatus = reg_3dgpu(h_reg, iTmx, h_StackA, h_StackB, imSize, imSize2, regMode,
+					2, FTOL, itLimit, subBgTrigger, deviceNum, regRecords); // registration with phase translation 
+			}
 			imgNum = imgNumStart;
 			regMode = 0; // Don't do more registraion for other time points
 			flagInitialTmx = 1; // Apply matrix to all other time points
@@ -4152,16 +4829,21 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 			break;
 		case 2:
 			if ((imgNum != imgNumStart) || (iColor>0)){
-				inputTmx = true; // use previous matrix as input
+				inputTmx = 1; // use previous matrix as input
 				memcpy(iTmx, h_affWeighted, NDIM*sizeof(float));
 			}
 			regStatus = reg_3dgpu(h_reg, iTmx, h_StackA, h_StackB, imSize, imSize2, regMethod,
 				inputTmx, FTOL, itLimit, subBgTrigger, deviceNum, regRecords);
 			mStatus = checkmatrix(iTmx);//if registration is good
-			if (!mStatus){ // apply previous matrix
-				memcpy(iTmx, h_affInitial, NDIM*sizeof(float)); // use input or previous matrix
-				regStatus = reg_3dgpu(h_reg, iTmx, h_StackA, h_StackB, imSize, imSize2, 0,
-					inputTmx, FTOL, itLimit, subBgTrigger, deviceNum, regRecords);
+			if (!mStatus){ // repeat with different initial matrix 
+				regStatus = reg_3dgpu(h_reg, iTmx, h_StackA, h_StackB, imSize, imSize2, regMode,
+					2, FTOL, itLimit, subBgTrigger, deviceNum, regRecords); // registration with phase translation 
+				mStatus = checkmatrix(iTmx);//if registration is good
+				if (!mStatus){ // apply previous matrix
+					memcpy(iTmx, h_affInitial, NDIM*sizeof(float)); // use input or previous matrix
+					regStatus = reg_3dgpu(h_reg, iTmx, h_StackA, h_StackB, imSize, imSize2, 0,
+						1, FTOL, itLimit, subBgTrigger, deviceNum, regRecords);
+				}
 			}
 			if ((imgNum == imgNumStart) && (iColor==0)){
 				memcpy(h_affWeighted, iTmx, NDIM*sizeof(float));
