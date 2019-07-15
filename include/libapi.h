@@ -5,7 +5,6 @@ typedef struct{
 	double x;
 	double y;
 } dComplex;
-
 #endif
 
 #ifdef __CUDACC__
@@ -18,89 +17,168 @@ typedef struct{
 
 #endif
 
+
+#define MAX_PATH 256
+
 ////***********API functions
 //// file I/O
 extern "C"
-__declspec(dllexport) char* concat(int count, ...);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+char* concat(int count, ...);
+
 extern "C"
-__declspec(dllexport) bool fexists(const char * filename);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+bool fexists(const char * filename);
+
+
 extern "C"
-__declspec(dllexport) unsigned short gettifinfo(char tifdir[], unsigned int *tifSize);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+unsigned short gettifinfo(char tifdir[], unsigned int *tifSize);
+
 extern "C"
-__declspec(dllexport) void readtifstack(float *h_Image, char tifdir[], unsigned int *imsize);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+void readtifstack(float *h_Image, char tifdir[], unsigned int *imsize);
+
 extern "C"
-__declspec(dllexport) void writetifstack(char tifdir[], float *h_Image, unsigned int *imsize, unsigned short bitPerSample);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+void writetifstack(char tifdir[], float *h_Image, unsigned int *imsize, unsigned short bitPerSample);
+
 extern "C"
-__declspec(dllexport) void readtifstack_16to16(unsigned short *h_Image, char tifdir[], unsigned int *imsize);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+void readtifstack_16to16(unsigned short *h_Image, char tifdir[], unsigned int *imsize);
+
 extern "C"
-__declspec(dllexport) void writetifstack_16to16(char tifdir[], unsigned short *h_Image, unsigned int *imsize);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+void writetifstack_16to16(char tifdir[], unsigned short *h_Image, unsigned int *imsize);
 
 //// 2D registration
 extern "C"
-__declspec(dllexport) int reg_2dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, int imSizex1, int imSizey1, int imSizex2, int imSizey2,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif 
+int reg_2dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, int imSizex1, int imSizey1, int imSizex2, int imSizey2,
 	int inputTmx, float FTOL, int itLimit, int deviceNum, float *regRecords);
 
 extern "C"
-__declspec(dllexport) int reg_2dshiftaligngpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, int imSizex1, int imSizey1, int imSizex2, int imSizey2,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int reg_2dshiftaligngpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, int imSizex1, int imSizey1, int imSizex2, int imSizey2,
 	int inputTmx, float shiftRegion, int totalStep, int deviceNum, float *regRecords);
 
 extern "C"
-__declspec(dllexport) int reg_2dshiftalignXgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, int imSizex1, int imSizey1, int imSizex2, int imSizey2,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int reg_2dshiftalignXgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, int imSizex1, int imSizey1, int imSizex2, int imSizey2,
 	int inputTmx, float shiftRegion, int totalStep, int deviceNum, float *regRecords);
 
 //// 3D registration
 extern "C"
-__declspec(dllexport) int reg_3dcpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int regMethod,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int reg_3dcpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int regMethod,
 int inputTmx, float FTOL, int itLimit, int subBgTrigger, int deviceNum, float *regRecords);
 
 extern "C"
-__declspec(dllexport) int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int regMethod,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int reg_3dgpu(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int regMethod,
 int inputTmx, float FTOL, int itLimit, int subBgTrigger, int deviceNum, float *regRecords);
 
 extern "C"
-__declspec(dllexport) int reg_3dphasetransgpu(int *shiftXYZ, float *h_img1, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int downSample, int deviceNum, float *regRecords);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int reg_3dphasetransgpu(int *shiftXYZ, float *h_img1, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int downSample, int deviceNum, float *regRecords);
 
 extern "C"
-__declspec(dllexport) int affinetrans_3dgpu(float *h_reg, float *iTmx, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int deviceNum);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int affinetrans_3dgpu(float *h_reg, float *iTmx, float *h_img2, unsigned int *imSize1, unsigned int *imSize2, int deviceNum);
 
 extern "C"
-__declspec(dllexport) int affinetrans_3dgpu_16to16(unsigned short *h_reg, float *iTmx, unsigned short *h_img2, unsigned int *imSize1, unsigned int *imSize2, int deviceNum);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int affinetrans_3dgpu_16to16(unsigned short *h_reg, float *iTmx, unsigned short *h_img2, unsigned int *imSize1, unsigned int *imSize2, int deviceNum);
 
 /// 3D deonvolution
 extern "C"
-__declspec(dllexport) int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *h_psf, float *h_psf_bp, unsigned int *psfSize,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *h_psf, float *h_psf_bp, unsigned int *psfSize,
 int itNumForDecon, int deviceNum, int gpuMemMode, float *deconRecords);
 
 extern "C"
-__declspec(dllexport) int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *imSize, float *h_psf1, float *h_psf2,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *imSize, float *h_psf1, float *h_psf2,
 unsigned int *psfSize, int itNumForDecon, int deviceNum, int gpuMemMode, float *deconRecords, bool flagUnmatch, float *h_psf_bp1, float *h_psf_bp2);
 
 //// 3D fusion: registration and deconvolution
 extern "C"
-__declspec(dllexport) int fusion_dualview(float *h_decon, float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int *imSizeIn1, unsigned int *imSizeIn2,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int fusion_dualview(float *h_decon, float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int *imSizeIn1, unsigned int *imSizeIn2,
 	float *pixelSize1, float *pixelSize2, int imRotation, int regMethod, int flagInitialTmx, float FTOL, int itLimit, float *h_psf1, float *h_psf2,
 	unsigned int *psfSizeIn, int itNumForDecon, int deviceNum, int gpuMemMode, float *fusionRecords, bool flagUnmatch, float *h_psf_bp1, float *h_psf_bp2);
 
 /// maximum intensity projectoions:
 extern "C"
-__declspec(dllexport) int mp2Dgpu(float *h_MP, unsigned int *sizeMP, float *h_img, unsigned int *sizeImg, bool flagZProj, bool flagXProj, bool flagYProj);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int mp2Dgpu(float *h_MP, unsigned int *sizeMP, float *h_img, unsigned int *sizeImg, bool flagZProj, bool flagXProj, bool flagYProj);
 
 extern "C"
-__declspec(dllexport) int mp3Dgpu(float *h_MP, unsigned int *sizeMP, float *h_img, unsigned int *sizeImg, bool flagXaxis, bool flagYaxis, int projectNum);
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int mp3Dgpu(float *h_MP, unsigned int *sizeMP, float *h_img, unsigned int *sizeImg, bool flagXaxis, bool flagYaxis, int projectNum);
 
 //// 3D Decon and fusion: batch processing
 extern "C"
-__declspec(dllexport) int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fileNamePrefix1, char *fileNamePrefix2, int imgNumStart, int imgNumEnd, int imgNumInterval, int imgNumTest,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fileNamePrefix1, char *fileNamePrefix2, int imgNumStart, int imgNumEnd, int imgNumInterval, int imgNumTest,
 	float *pixelSize1, float *pixelSize2, int regMode, int imRotation, int flagInitialTmx, float *iTmx, float FTOL, int itLimit, int deviceNum, int *flagSaveInterFiles, float *records);
 
 extern "C"
-__declspec(dllexport) int fusion_dualview_batch(char *outFolder, char *inFolder1, char *inFolder2, char *fileNamePrefix1, char *fileNamePrefix2, int imgNumStart, int imgNumEnd, int imgNumInterval, int imgNumTest,
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+int fusion_dualview_batch(char *outFolder, char *inFolder1, char *inFolder2, char *fileNamePrefix1, char *fileNamePrefix2, int imgNumStart, int imgNumEnd, int imgNumInterval, int imgNumTest,
 	float *pixelSize1, float *pixelSize2, int regMode, int imRotation, int flagInitialTmx, float *iTmx, float FTOL, int itLimit, char *filePSF1, char *filePSF2,
 	int itNumForDecon, int deviceNum, int *flagSaveInterFiles, int bitPerSample, float *records, bool flagUnmatch, char *filePSF_bp1, char *filePSF_bp2);
 
 // Query GPU device
 extern "C"
-__declspec(dllexport) void queryDevice();
+#ifdef _MSC_VER  
+__declspec(dllexport) 
+#endif
+void queryDevice();
 
 // sum cpu
 template <class T>
