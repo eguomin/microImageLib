@@ -3572,6 +3572,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 #endif
 	}
 	if (flagMultiColor){
+#ifdef _WIN32 
 		subFolderCount = findSubFolders(&subFolderNames[0][0], mainFolder);
 
 		if (subFolderCount > 20)
@@ -3582,6 +3583,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 				printf("...Subfolders %d: %s\n", j + 1, &subFolderNames[j][0]);
 		}
 		inFolder = concat(3, mainFolder, &subFolderNames[0][0], "/");
+#endif
 	}
 	else{
 		inFolder = folder;
@@ -3632,6 +3634,8 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 	char *deconFolder;
 	// flagSaveProjZ --> 1: save max projections; 0: not.
 	if (flagMultiColor){
+
+#ifdef _WIN32 
 		CreateDirectory(outMainFolder, NULL);
 		for (int j = 0; j < subFolderCount; j++){
 			outFolder = concat(3, outMainFolder, &subFolderNames[j][0], "/");
@@ -3641,6 +3645,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 			CreateDirectory(deconFolder, NULL);
 			free(outFolder); free(inFolder); free(deconFolder);
 		}
+#endif
 	}
 	else{
 		outFolder = outMainFolder;
