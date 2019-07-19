@@ -151,6 +151,31 @@ multicomplex3Dkernel(fComplex *d_odata, fComplex *d_idata1, fComplex *d_idata2, 
 }
 
 __global__ void
+multicomplexnorm3Dkernel(fComplex *d_odata, fComplex *d_idata1, fComplex *d_idata2, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		int ijk = i + sx * j + sx * sy * k;
+		fComplex a = d_idata1[ijk];
+		fComplex b = d_idata2[ijk];
+		float c = a.x*b.x - a.y*b.y;
+		float d = a.x*b.y + a.y*b.x;
+		float e = sqrt(c*c + d*d);
+		if (e != 0){
+			d_odata[ijk].x = c/e;
+			d_odata[ijk].y = d/e;
+		}
+		else{
+			d_odata[ijk].x = 0;
+			d_odata[ijk].y = 0;
+		}
+		
+	}
+
+}
+
+__global__ void
 multidcomplex3Dkernel(dComplex *d_odata, dComplex *d_idata1, dComplex *d_idata2, int sx, int sy, int sz){
 	const int i = blockDim.x * blockIdx.x + threadIdx.x;
 	const int j = blockDim.y * blockIdx.y + threadIdx.y;
@@ -423,126 +448,28 @@ __global__ void rotbyyaxiskernel(T *d_odata, T *d_idata, int sx, int sy, int sz,
 	}
 }
 
-template <class T>
-__global__ void flipPSFkernel(T *d_odata, T *d_idata, int sx, int sy, int sz){
-	const int i = blockDim.x * blockIdx.x + threadIdx.x;
-	const int j = blockDim.y * blockIdx.y + threadIdx.y;
-	const int k = blockDim.z * blockIdx.z + threadIdx.z;
-	if (i < sx && j < sy && k < sz){
-		//h_flippedPSFA[i][j][k] = h_PSFA[PSFx-i-1][PSFy-j-1][PSFz-k-1]
-		d_odata[i*sy*sz + j*sz + k] = d_idata[(sx - i - 1) *sy*sz + (sy - j - 1)*sz + (sz - k - 1)];
-	}
-}
 
 template <class T>
-__global__ void padPSFKernel(
-	T *d_PaddedPSF,
-	T *d_PSF,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int PSFx,
-	int PSFy,
-	int PSFz,
-	int PSFox,
-	int PSFoy,
-	int PSFoz
-	){
-	const int x = blockDim.x * blockIdx.x + threadIdx.x;
-	const int y = blockDim.y * blockIdx.y + threadIdx.y;
-	const int z = blockDim.z * blockIdx.z + threadIdx.z;
-	if (x < PSFx && y < PSFy && z < PSFz){
-		int dx, dy, dz;
-		dx = x - PSFox; dy = y - PSFoy; dz = z - PSFoz;
-		if (dx < 0) dx += FFTx;
-		if (dy < 0) dy += FFTy;
-		if (dz < 0) dz += FFTz;
-		//d_PaddedPSF[dx][dy][dz] = d_PSF[x][y][z]
-		if (dx >= 0 && dx < FFTx && dy >= 0 && dy < FFTy && dz >= 0 && dz < FFTz)
-			d_PaddedPSF[dx*FFTy*FFTz + dy*FFTz + dz] = d_PSF[x*PSFy*PSFz + y*PSFz + z];
-	}
-}
-
-template <class T>
-__global__ void padStackKernel(
-	T *d_PaddedStack,
-	T *d_Stack,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int sx,
-	int sy,
-	int sz,
-	int imox,
-	int imoy,
-	int imoz
-	){
-	const int dx = blockDim.x * blockIdx.x + threadIdx.x;
-	const int dy = blockDim.y * blockIdx.y + threadIdx.y;
-	const int dz = blockDim.z * blockIdx.z + threadIdx.z;
-	if (dx < FFTx && dy < FFTy && dz < FFTz){
-		int x, y, z;
-		if (dx < imox){
-			x = 0;
-		}
-		if (dy < imoy){
-			y = 0;
-		}
-		if (dz < imoz){
-			z = 0;
-		}
-		if (dx >= imox && dx < (imox + sx)){
-			x = dx - imox;
-		}
-		if (dy >= imoy && dy < (imoy + sy)){
-			y = dy - imoy;
-		}
-		if (dz >= imoz && dz < (imoz + sz)){
-			z = dz - imoz;
-		}
-		if (dx >= (imox + sx)){
-			x = sx - 1;
-		}
-		if (dy >= (imoy + sy)){
-			y = sy - 1;
-		}
-		if (dz >= (imoz + sz)){
-			z = sz - 1;
-		}
-		d_PaddedStack[dx*FFTy*FFTz + dy*FFTz + dz] = d_Stack[x*sy*sz + y*sz + z];
-	}
-}
-
-template <class T>
-__global__ void cropStackKernel(
-	T *d_PaddedStack,
-	T *d_Stack,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int sx,
-	int sy,
-	int sz,
-	int imox,
-	int imoy,
-	int imoz
-	){
+__global__ void circshiftgpukernel(T *d_odata, T *d_idata, int sx, int sy, int sz, int dx, int dy, int dz){
 	const int x = blockDim.x * blockIdx.x + threadIdx.x;
 	const int y = blockDim.y * blockIdx.y + threadIdx.y;
 	const int z = blockDim.z * blockIdx.z + threadIdx.z;
 	if (x < sx && y < sy && z < sz){
-		int dx, dy, dz;
-		dx = imox + x; dy = imoy + y; dz = imoz + z;
-		d_Stack[x*sy*sz + y*sz + z] = d_PaddedStack[dx*FFTy*FFTz + dy*FFTz + dz];
+		int tx, ty, tz;
+		tx = x - dx; ty = y - dy; tz = z -dz;
+		if (tx < 0) tx += sx;
+		if (ty < 0) ty += sy;
+		if (tz < 0) tz += sz;
+		if (tx > sx) tx = tx - sx;
+		if (ty > sy) ty = ty - sy;
+		if (tz > sz) tz = tz - sz;
+		//output[z][y][x] = input[tz][ty][tx]
+		d_odata[z*sy*sx + y*sx + x] = d_idata[tz*sy*sx + ty*sx + tx];
 	}
 }
 
 
-__global__ void accesstexturekernel(
-	float x,
-	float y,
-	float z
-	){
+__global__ void accesstexturekernel(float x, float y, float z){
 	float xi = x + (float)threadIdx.x;
 	float yi = y + (float)threadIdx.y;
 	float zi = z + (float)threadIdx.z;
@@ -551,15 +478,7 @@ __global__ void accesstexturekernel(
 }
 
 template <class T>
-__global__ void affinetransformkernel(
-	T *d_t,
-	int sx,
-	int sy,
-	int sz,
-	int sx2,
-	int sy2,
-	int sz2
-	){
+__global__ void affinetransformkernel(T *d_t, int sx, int sy, int sz, int sx2, int sy2, int sz2){
 	const int x = blockDim.x * blockIdx.x + threadIdx.x;
 	const int y = blockDim.y * blockIdx.y + threadIdx.y;
 	const int z = blockDim.z * blockIdx.z + threadIdx.z;
@@ -584,17 +503,7 @@ __global__ void affinetransformkernel(
 	}
 }
 
-__global__ void corrkernel(
-	float *d_s,
-	float *d_sqr,
-	float *d_corr,
-	int sx,
-	int sy,
-	int sz,
-	int sx2,
-	int sy2,
-	int sz2
-	){
+__global__ void corrkernel(float *d_s, float *d_sqr, float *d_corr, int sx, int sy, int sz, int sx2, int sy2, int sz2){
 	const int x = blockDim.x * blockIdx.x + threadIdx.x;
 	const int y = blockDim.y * blockIdx.y + threadIdx.y;
 	const int z = blockDim.z * blockIdx.z + threadIdx.z;
@@ -619,17 +528,7 @@ __global__ void corrkernel(
 	}
 }
 
-__global__ void corrkernel2(
-	float *d_s,
-	double *d_temp1,
-	double *d_temp2,
-	int sx,
-	int sy,
-	int sz,
-	int sx2,
-	int sy2,
-	int sz2
-	){
+__global__ void corrkernel2(float *d_s, double *d_temp1, double *d_temp2, int sx, int sy, int sz, int sx2, int sy2, int sz2){
 	const int x = blockDim.x * blockIdx.x + threadIdx.x;
 	const int y = blockDim.y * blockIdx.y + threadIdx.y;
 	int z;
@@ -677,15 +576,7 @@ __global__ void affineTransform2Dkernel(float *d_t, int sx, int sy, int sx2, int
 	}
 }
 
-__global__ void corr2Dkernel(
-	float *d_s,
-	float *d_sqr,
-	float *d_corr,
-	int sx,
-	int sy,
-	int sx2,
-	int sy2
-	){
+__global__ void corr2Dkernel(float *d_s, float *d_sqr, float *d_corr, int sx, int sy, int sx2, int sy2){
 	const int x = blockDim.x * blockIdx.x + threadIdx.x;
 	const int y = blockDim.y * blockIdx.y + threadIdx.y;
 	float t, s;
@@ -705,5 +596,163 @@ __global__ void corr2Dkernel(
 		s = d_s[x + y*sx];
 		d_sqr[x + y*sx] = t*t;
 		d_corr[x + y*sx] = s * t;
+	}
+}
+
+template <class T>
+__global__ void flipPSFkernel(T *d_odata, T *d_idata, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		//h_flippedPSFA[i][j][k] = h_PSFA[PSFx-i-1][PSFy-j-1][PSFz-k-1]
+		d_odata[i*sy*sz + j*sz + k] = d_idata[(sx - i - 1) *sy*sz + (sy - j - 1)*sz + (sz - k - 1)];
+	}
+}
+
+template <class T>
+__global__ void padPSFKernel(T *d_PaddedPSF, T *d_PSF, int FFTx, int FFTy, int FFTz, int PSFx, int PSFy, int PSFz, int PSFox, int PSFoy, int PSFoz){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	if (x < PSFx && y < PSFy && z < PSFz){
+		int dx, dy, dz;
+		dx = x - PSFox; dy = y - PSFoy; dz = z - PSFoz;
+		if (dx < 0) dx += FFTx;
+		if (dy < 0) dy += FFTy;
+		if (dz < 0) dz += FFTz;
+		//d_PaddedPSF[dx][dy][dz] = d_PSF[x][y][z]
+		if (dx >= 0 && dx < FFTx && dy >= 0 && dy < FFTy && dz >= 0 && dz < FFTz)
+			d_PaddedPSF[dx*FFTy*FFTz + dy*FFTz + dz] = d_PSF[x*PSFy*PSFz + y*PSFz + z];
+	}
+}
+
+template <class T>
+__global__ void padStackKernel(T *d_PaddedStack, T *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz){
+	const int dx = blockDim.x * blockIdx.x + threadIdx.x;
+	const int dy = blockDim.y * blockIdx.y + threadIdx.y;
+	const int dz = blockDim.z * blockIdx.z + threadIdx.z;
+	if (dx < FFTx && dy < FFTy && dz < FFTz){
+		int x, y, z;
+		if (dx < imox){
+			x = 0;
+		}
+		if (dy < imoy){
+			y = 0;
+		}
+		if (dz < imoz){
+			z = 0;
+		}
+		if (dx >= imox && dx < (imox + sx)){
+			x = dx - imox;
+		}
+		if (dy >= imoy && dy < (imoy + sy)){
+			y = dy - imoy;
+		}
+		if (dz >= imoz && dz < (imoz + sz)){
+			z = dz - imoz;
+		}
+		if (dx >= (imox + sx)){
+			x = sx - 1;
+		}
+		if (dy >= (imoy + sy)){
+			y = sy - 1;
+		}
+		if (dz >= (imoz + sz)){
+			z = sz - 1;
+		}
+		d_PaddedStack[dx*FFTy*FFTz + dy*FFTz + dz] = d_Stack[x*sy*sz + y*sz + z];
+	}
+}
+
+template <class T>
+__global__ void cropStackKernel(T *d_PaddedStack, T *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	if (x < sx && y < sy && z < sz){
+		int dx, dy, dz;
+		dx = imox + x; dy = imoy + y; dz = imoz + z;
+		d_Stack[x*sy*sz + y*sz + z] = d_PaddedStack[dx*FFTy*FFTz + dy*FFTz + dz];
+	}
+}
+
+
+// ***** new functions
+template <class T>
+__global__ void flipgpukernel(T *d_odata, T *d_idata, int sx, int sy, int sz){
+	const int i = blockDim.x * blockIdx.x + threadIdx.x;
+	const int j = blockDim.y * blockIdx.y + threadIdx.y;
+	const int k = blockDim.z * blockIdx.z + threadIdx.z;
+	if (i < sx && j < sy && k < sz){
+		//d_odata[k][j][i] = d_idata[sz-k-1][sy-j-1][sx-i-1]
+		d_odata[k*sy*sx + j*sx + i] = d_idata[(sz - k - 1) *sy*sx + (sy - j - 1)*sx + (sx - i - 1)];
+	}
+}
+
+template <class T>
+__global__ void padPSFgpukernel(T *d_odata, T *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	if (x < sx2 && y < sy2 && z < sz2){
+		int dx, dy, dz;
+		dx = x - sox; dy = y - soy; dz = z - soz;
+		if (dx < 0) dx += sx;
+		if (dy < 0) dy += sy;
+		if (dz < 0) dz += sz;
+		//d_PaddedPSF[dz][dy][dx] = d_PSF[z][y][x]
+		if (dx >= 0 && dx < sx && dy >= 0 && dy < sy && dz >= 0 && dz < sz)
+			d_odata[dz*sy*sx + dy*sx + dx] = d_idata[z*sy2*sx2 + y*sx2 + x];
+	}
+}
+
+template <class T>
+__global__ void padstackgpukernel(T *d_odata, T *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz){
+	const int dx = blockDim.x * blockIdx.x + threadIdx.x;
+	const int dy = blockDim.y * blockIdx.y + threadIdx.y;
+	const int dz = blockDim.z * blockIdx.z + threadIdx.z;
+	if (dx < sx && dy < sy && dz < sz){
+		int x, y, z;
+		if (dx < sox){
+			x = 0;
+		}
+		if (dy < soy){
+			y = 0;
+		}
+		if (dz < soz){
+			z = 0;
+		}
+		if (dx >= sox && dx < (sox + sx2)){
+			x = dx - sox;
+		}
+		if (dy >= soy && dy < (soy + sy2)){
+			y = dy - soy;
+		}
+		if (dz >= soz && dz < (soz + sz2)){
+			z = dz - soz;
+		}
+		if (dx >= (sox + sx2)){
+			x = sx2 - 1;
+		}
+		if (dy >= (soy + sy2)){
+			y = sy2 - 1;
+		}
+		if (dz >= (soz + sz2)){
+			z = sz2 - 1;
+		}
+		d_odata[dz*sy*sx + dy*sx + dx] = d_idata[z*sy2*sx2 + y*sx2 + x];
+	}
+}
+
+template <class T>
+__global__ void cropgpukernel(T *d_odata, T *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz){
+	const int x = blockDim.x * blockIdx.x + threadIdx.x;
+	const int y = blockDim.y * blockIdx.y + threadIdx.y;
+	const int z = blockDim.z * blockIdx.z + threadIdx.z;
+	if (x < sx2 && y < sy2 && z < sz2){
+		int dx, dy, dz;
+		dx = sox + x; dy = soy + y; dz = soz + z;
+		d_odata[z*sy*sx + y*sx + x] = d_idata[dz*sy2*sx2 + dy*sx2 + dx];
 	}
 }

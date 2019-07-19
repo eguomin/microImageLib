@@ -140,7 +140,7 @@ void add3Dgpu(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	add3Dkernel<T> << <grids, threads >> >(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void add3Dgpu<int>(int *d_odata, int *d_idata1, int *d_idata2, int sx, int sy, int sz);
 template void add3Dgpu<float>(float *d_odata, float *d_idata1, float *d_idata2, int sx, int sy, int sz);
@@ -152,7 +152,7 @@ void addvaluegpu(T *d_odata, T *d_idata1, T d_idata2, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	addvaluekernel<T> <<<grids, threads >>>(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void addvaluegpu<int>(int *d_odata, int *d_idata1, int d_idata2, int sx, int sy, int sz);
 template void addvaluegpu<float>(float *d_odata, float *d_idata1, float d_idata2, int sx, int sy, int sz);
@@ -164,7 +164,7 @@ void sub3Dgpu(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	sub3Dkernel<T> <<<grids, threads >>>(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void sub3Dgpu<int>(int *d_odata, int *d_idata1, int *d_idata2, int sx, int sy, int sz);
 template void sub3Dgpu<float>(float *d_odata, float *d_idata1, float *d_idata2, int sx, int sy, int sz);
@@ -177,7 +177,7 @@ void multi3Dgpu(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	multi3Dkernel<T> << <grids, threads >> >(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void multi3Dgpu<int>(int *d_odata, int *d_idata1, int *d_idata2, int sx, int sy, int sz);
 template void multi3Dgpu<float>(float *d_odata, float *d_idata1, float *d_idata2, int sx, int sy, int sz);
@@ -189,7 +189,7 @@ void multivaluegpu(T *d_odata, T *d_idata1, T d_idata2, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	multivaluekernel<T> <<<grids, threads >>>(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void multivaluegpu<int>(int *d_odata, int *d_idata1, int d_idata2, int sx, int sy, int sz);
 template void multivaluegpu<float>(float *d_odata, float *d_idata1, float d_idata2, int sx, int sy, int sz);
@@ -201,8 +201,18 @@ void multicomplex3Dgpu(fComplex *d_odata, fComplex *d_idata1, fComplex *d_idata2
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	multicomplex3Dkernel<<<grids, threads >>>(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
+
+//multiply float complex and do normalization
+extern "C"
+void multicomplexnorm3Dgpu(fComplex *d_odata, fComplex *d_idata1, fComplex *d_idata2, int sx, int sy, int sz){
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
+	multicomplexnorm3Dkernel << <grids, threads >> >(d_odata, d_idata1, d_idata2, sx, sy, sz);
+	cudaThreadSynchronize();
+}
+
 
 //multiply double complex
 extern "C"
@@ -210,7 +220,7 @@ void multidcomplex3Dgpu(dComplex *d_odata, dComplex *d_idata1, dComplex *d_idata
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	multidcomplex3Dkernel<<<grids, threads >> >(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 //divide
@@ -219,7 +229,7 @@ void div3Dgpu(T *d_odata, T *d_idata1, T *d_idata2, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	div3Dkernel<T> <<<grids, threads >>>(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void div3Dgpu<int>(int *d_odata, int *d_idata1, int *d_idata2, int sx, int sy, int sz);
 template void div3Dgpu<float>(float *d_odata, float *d_idata1, float *d_idata2, int sx, int sy, int sz);
@@ -231,7 +241,7 @@ void conj3Dgpu(fComplex *d_odata, fComplex *d_idata, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	conj3Dkernel <<<grids, threads >>>(d_odata, d_idata, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 // sumarization
@@ -260,7 +270,7 @@ T sumgpu(T *d_idata, T *d_temp, T *h_temp, int totalSize){
 		totalSize,
 		nIsPow2
 		);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	cudaMemcpy(h_temp, d_temp, gridSize * sizeof(T), cudaMemcpyDeviceToHost);
 	T mySumGPU = 0;
 	for (int i = 0; i < gridSize; i++){
@@ -280,7 +290,7 @@ double sum3Dgpu(T *d_idata, double *d_temp, double *h_temp, int sx, int sy, int 
 	dim3 threads(blockSize2Dx, blockSize2Dy, 1);
 	dim3 grids(iDivUp(sx, threads.x), iDivUp(sy, threads.y));
 	reduceZ<T> <<<grids, threads >>>(d_idata, d_temp, sx, sy, sz); 
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	int sxy = sx * sy;
 	cudaMemcpy(h_temp, d_temp, sxy * sizeof(double), cudaMemcpyDeviceToHost); 
 	double mySumGPU = 0; 
@@ -301,7 +311,7 @@ T sumgpu1D(T *d_idata, T *d_temp, T *h_temp, int totalSize){
 		d_temp,
 		totalSize
 		);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	int tempSize = 5 * blockSize;
 	cudaMemcpy(h_temp, d_temp, tempSize * sizeof(T), cudaMemcpyDeviceToHost);
 	T mySumGPU = 0;
@@ -328,12 +338,12 @@ T max3Dgpu(int *corXYZ, T *d_idata, int sx, int sy, int sz){
 	dim3 threads(blockSize2Dx, blockSize2Dy, 1);
 	dim3 grids(iDivUp(sx, threads.x), iDivUp(sy, threads.y));
 	maxZkernel<T> <<<grids, threads >>>(d_idata, d_temp1, d_temp2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	cudaMemcpy(h_temp1, d_temp1, sx*sy * sizeof(T), cudaMemcpyDeviceToHost);
 	cudaMemcpy(h_temp2, d_temp2, sx*sy * sizeof(int), cudaMemcpyDeviceToHost);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 
-	T peakValue = -1; // h_temp1[0];
+	T peakValue = h_temp1[0];
 	T t;
 	for (int i = 0; i < sx; i++){
 		for (int j = 0; j < sy; j++){
@@ -390,7 +400,7 @@ void maxvalue3Dgpu(T *d_odata, T *d_idata1, T d_idata2, int sx, int sy, int sz){
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	maxvalue3Dgpukernel<T><<<grids, threads >>>(d_odata, d_idata1, d_idata2, sx, sy, sz);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void maxvalue3Dgpu<int>(int *d_odata, int *d_idata1, int d_idata2, int sx, int sy, int sz);
 template void maxvalue3Dgpu<float>(float *d_odata, float *d_idata1, float d_idata2, int sx, int sy, int sz);
@@ -427,7 +437,7 @@ void maxprojection(T *d_odata, T *d_idata, int sx, int sy, int sz, int pDirectio
 	dim3 threads(blockSize2Dx, blockSize2Dy, 1);
 	dim3 grids(iDivUp(psx, threads.x), iDivUp(psy, threads.y));
 	maxprojectionkernel<T> <<<grids, threads >>>(d_odata, d_idata, sx, sy, sz, psx, psy, psz, pDirection);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 template void maxprojection<int>(int *d_odata, int *d_idata, int sx, int sy, int sz, int pDirection);
@@ -443,7 +453,7 @@ void changestorageordergpu(T *d_odata, T *d_idata, int sx, int sy, int sz, int o
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	changestorageordergpukernel<T><<<grids, threads>>>(d_odata, d_idata, sx, sy, sz, orderMode);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void changestorageordergpu<int>(int *d_odata, int *d_idata, int sx, int sy, int sz, int orderMode);
 template void changestorageordergpu<float>(float *d_odata, float *d_idata, int sx, int sy, int sz, int orderMode);
@@ -458,7 +468,7 @@ void rotbyyaxis(T *d_odata, T *d_idata, int sx, int sy, int sz, int rotDirection
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
 	rotbyyaxiskernel<T> <<<grids, threads >>>(d_odata, d_idata, sx, sy, sz, rotDirection);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 template void rotbyyaxis<int>(int *d_odata, int *d_idata, int sx, int sy, int sz, int rotDirection);
 template void rotbyyaxis<float>(float *d_odata, float *d_idata, int sx, int sy, int sz, int rotDirection);
@@ -750,203 +760,19 @@ extern "C" void dof9tomatrix(float * p_out, float *p_dof, int dofNum){
 }
 
 template <class T>
-void flipPSF(T *d_odata, T *d_idata, int sx, int sy, int sz){
+void circshiftgpu(T *d_odata, T *d_idata, int sx, int sy, int sz, int dx, int dy, int dz){
+	//orderMode
+	// 1: change tiff storage order to C storage order
+	//-1: change C storage order to tiff storage order
+	assert(d_odata != d_idata);
 	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
 	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
-	flipPSFkernel<T> <<<grids, threads >>>(d_odata, d_idata, sx, sy, sz);
-	cudaDeviceSynchronize();
+	circshiftgpukernel<T> <<<grids, threads >>>(d_odata, d_idata, sx, sy, sz, dx, dy, dz);
+	cudaThreadSynchronize();
 }
-template void flipPSF<float>(float *d_odata, float *d_idata, int sx, int sy, int sz);
-template void flipPSF<double>(double *d_odata, double *d_idata, int sx, int sy, int sz);
-
-template <class T>
-void padPSF(
-	T *d_PaddedPSF,
-	T *d_PSF,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int PSFx,
-	int PSFy,
-	int PSFz,
-	int PSFox,
-	int PSFoy,
-	int PSFoz
-	){
-	assert(d_PaddedPSF != d_PSF);
-	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
-	dim3 grids(iDivUp(PSFx, threads.x), iDivUp(PSFy, threads.y), iDivUp(PSFz, threads.z));
-	padPSFKernel<T> <<<grids, threads >>>(
-		d_PaddedPSF,
-		d_PSF,
-		FFTx,
-		FFTy,
-		FFTz,
-		PSFx,
-		PSFy,
-		PSFz,
-		PSFox,
-		PSFoy,
-		PSFoz
-		);
-	cudaDeviceSynchronize();
-}
-
-template void
-padPSF<float>(
-float *d_PaddedPSF,
-float *d_PSF,
-int FFTx,
-int FFTy,
-int FFTz,
-int PSFx,
-int PSFy,
-int PSFz,
-int PSFox,
-int PSFoy,
-int PSFoz
-);
-
-template void 
-padPSF<double>(
-	double *d_PaddedPSF,
-	double *d_PSF,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int PSFx,
-	int PSFy,
-	int PSFz,
-	int PSFox,
-	int PSFoy,
-	int PSFoz
-	);
-
-template <class T>
-void padStack(
-	T *d_PaddedStack,
-	T *d_Stack,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int sx,
-	int sy,
-	int sz,
-	int imox,
-	int imoy,
-	int imoz
-	){
-	assert(d_PaddedStack != d_Stack);
-	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
-	dim3 grids(iDivUp(FFTx, threads.x), iDivUp(FFTy, threads.y), iDivUp(FFTz, threads.z));
-	padStackKernel<T> <<< grids, threads >>> (
-		d_PaddedStack,
-		d_Stack,
-		FFTx,
-		FFTy,
-		FFTz,
-		sx,
-		sy,
-		sz,
-		imox,
-		imoy,
-		imoz
-		);
-	cudaDeviceSynchronize();
-}
-
-template void 
-padStack<float>(
-	float *d_PaddedStack,
-	float *d_Stack,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int sx,
-	int sy,
-	int sz,
-	int imox,
-	int imoy,
-	int imoz
-	);
-
-template void
-padStack<double>(
-double *d_PaddedStack,
-double *d_Stack,
-int FFTx,
-int FFTy,
-int FFTz,
-int sx,
-int sy,
-int sz,
-int imox,
-int imoy,
-int imoz
-);
-
-template <class T>
-void cropStack(
-	T *d_PaddedStack,
-	T *d_Stack,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int sx,
-	int sy,
-	int sz,
-	int imox,
-	int imoy,
-	int imoz
-	){
-	assert(d_PaddedStack != d_Stack);
-	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
-	dim3 grids(iDivUp(sx, threads.x), iDivUp(sy, threads.y), iDivUp(sz, threads.z));
-	cropStackKernel<T> <<< grids, threads >>> (
-		d_PaddedStack,
-		d_Stack,
-		FFTx,
-		FFTy,
-		FFTz,
-		sx,
-		sy,
-		sz,
-		imox,
-		imoy,
-		imoz
-		);
-	cudaDeviceSynchronize();
-}
-
-template void 
-cropStack<float>(
-	float *d_PaddedStack,
-	float *d_Stack,
-	int FFTx,
-	int FFTy,
-	int FFTz,
-	int sx,
-	int sy,
-	int sz,
-	int imox,
-	int imoy,
-	int imoz
-	);
-
-template void
-cropStack<double>(
-double *d_PaddedStack,
-double *d_Stack,
-int FFTx,
-int FFTy,
-int FFTz,
-int sx,
-int sy,
-int sz,
-int imox,
-int imoy,
-int imoz
-);
+template void circshiftgpu<int>(int *d_odata, int *d_idata, int sx, int sy, int sz, int dx, int dy, int dz);
+template void circshiftgpu<float>(float *d_odata, float *d_idata, int sx, int sy, int sz, int dx, int dy, int dz);
+template void circshiftgpu<double>(double *d_odata, double *d_idata, int sx, int sy, int sz, int dx, int dy, int dz);
 
 extern "C" void CopyTranMatrix(float *x, int dataSize){
 	cudaMemcpyToSymbol(d_aff, x, dataSize, 0, cudaMemcpyHostToDevice);// copy host affine matrix to device const
@@ -966,7 +792,7 @@ void cudacopyhosttoarray(cudaArray *d_Array, cudaChannelFormatDesc channelDesc, 
 	copyParams.extent = make_cudaExtent(sx, sy, sz);
 	copyParams.kind = cudaMemcpyHostToDevice;
 	cudaMemcpy3D(&copyParams);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 template void
@@ -982,7 +808,7 @@ void cudacopydevicetoarray(cudaArray *d_Array, cudaChannelFormatDesc channelDesc
 	copyParams.extent = make_cudaExtent(sx, sy, sz);
 	copyParams.kind = cudaMemcpyDeviceToDevice;
 	cudaMemcpy3D(&copyParams);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 
@@ -998,7 +824,7 @@ extern "C" void BindTexture(
 	tex.normalized = false; //NB coordinates in [0,1]
 	// Bind the array to the texture
 	cudaBindTextureToArray(tex, d_Array, channelDesc);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 extern "C" void BindTexture16(
@@ -1013,25 +839,25 @@ extern "C" void BindTexture16(
 	tex.normalized = false; //NB coordinates in [0,1]
 	// Bind the array to the texture
 	cudaBindTextureToArray(tex16, d_Array, channelDesc);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 extern "C" void UnbindTexture(
 	){
 	cudaUnbindTexture(tex);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 extern "C" void UnbindTexture16(
 	){
 	cudaUnbindTexture(tex16);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 extern "C" void AccessTexture(float x, float y,float z){
 	dim3 threads(2, 2, 2);
 	accesstexturekernel <<<1, threads >>>(x, y, z);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 template <class T> 
@@ -1055,7 +881,7 @@ void affineTransform(
 		sy2,
 		sz2
 		);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 template void 
@@ -1107,7 +933,7 @@ double corrfunc(float *d_s, // source stack
 		sy2,
 		sz2
 		);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	double corrSum = sum3Dgpu(d_corr, d_temp, h_temp, sx, sy, sz); 
 	double sqrSum = sum3Dgpu(d_sqr, d_temp, h_temp, sx, sy, sz);
 	return (corrSum / sqrt(sqrSum));
@@ -1140,7 +966,7 @@ double corrfunc2(float *d_s, // source stack
 		sy2,
 		sz2
 		);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	int sxy = sx * sy;
 	double sqrSum = 0, corrSum = 0;
 	cudaMemcpy(h_temp, d_temp1, sxy * sizeof(double), cudaMemcpyDeviceToHost);
@@ -1181,7 +1007,7 @@ double corrfunc3(float *d_s, // source stack
 		sy2,
 		sz2
 		);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	int sxy = sx * sy;
 	double sqrSum = 0, corrSum = 0;
 	if (sxy > 100000){
@@ -1204,7 +1030,7 @@ double corrfunc3(float *d_s, // source stack
 extern "C"
 void cudacopyhosttoarray2D(cudaArray *d_Array, cudaChannelFormatDesc channelDesc, float *h_idata, int totalSize){
 	cudaMemcpyToArray(d_Array, 0, 0, h_idata, totalSize*sizeof(float), cudaMemcpyHostToDevice);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 extern "C" void BindTexture2D(
@@ -1231,7 +1057,7 @@ void affineTransform2D(float *d_t, int sx, int sy, int sx2, int sy2){
 	dim3 threads(blockSize2Dx, blockSize2Dy, 1);
 	dim3 grids(iDivUp(sx, threads.x), iDivUp(sy, threads.y));
 	affineTransform2Dkernel <<<grids, threads >>>(d_t, sx, sy, sx2, sy2);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 }
 
 double corrfunc2D(float *d_s, // source stack
@@ -1257,7 +1083,7 @@ double corrfunc2D(float *d_s, // source stack
 		sx2,
 		sy2
 		);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	int sxy = sx*sy;
 	cudaMemcpy(h_temp, d_corr, sxy * sizeof(float), cudaMemcpyDeviceToHost);
 	double corrSum = sumcpu(h_temp, sxy);
@@ -1456,7 +1282,7 @@ double corrfunccpu3(float *h_s,
 	}
 	return (corrSum / sqrt(sqrSum));
 }
-double corrfunccpu2(float *h_s,
+double corrfunccpu2_old(float *h_s,
 	float *h_t,// source stack
 	float *aff,
 	int sx,
@@ -1525,7 +1351,7 @@ double corrfunccpu2(float *h_s,
 	return (corrSum / sqrt(sqrSum));
 }
 
-void affinetransformcpu(float *h_s,
+void affinetransformcpu_old(float *h_s,
 	float *h_t,// source stack
 	float *aff,
 	int sx,
@@ -1582,3 +1408,242 @@ void affinetransformcpu(float *h_s,
 		}
 	}
 }
+
+
+double corrfunccpu2(float *h_s,
+	float *h_t,// source stack
+	float *aff,
+	int sx,
+	int sy,
+	int sz,
+	int sx2,
+	int sy2,
+	int sz2
+	){
+	const float r0 = aff[0], r1 = aff[1], r2 = aff[2], r3 = aff[3], r4 = aff[4], r5 = aff[5],
+		r6 = aff[6], r7 = aff[7], r8 = aff[8], r9 = aff[9], r10 = aff[10], r11 = aff[11];
+
+	double sqrSum = 0, corrSum = 0;
+	float ix, iy, iz, tx, ty, tz;
+	int x1, y1, z1, x2, y2, z2;
+	float dx1, dy1, dz1, dx2, dy2, dz2;
+	float q1, q2, q3, q4, q5, q6, q7, q8;
+	float s, t;
+	int syz = sy*sz, syz2 = sy2*sz2, x1syz2, x2syz2, y1sz2, y2sz2;
+	for (int i = 0; i < sx; i++){
+		ix = (float)i;
+		for (int j = 0; j < sy; j++){
+			iy = (float)j;
+			for (int k = 0; k < sz; k++){
+				iz = (float)k;
+
+				tx = r0 * ix + r1 * iy + r2 * iz + r3;
+				ty = r4 * ix + r5 * iy + r6 * iz + r7;
+				tz = r8 * ix + r9 * iy + r10 * iz + r11;
+
+				x1 = (int)tx; y1 = (int)ty; z1 = (int)tz;
+				x2 = x1 + 1; y2 = y1 + 1; z2 = z1 + 1;
+
+				dx1 = tx - (float)x1; dy1 = ty - (float)y1; dz1 = tz - (float)z1;
+				dx2 = 1 - dx1; dy2 = 1 - dy1; dz2 = 1 - dz1;
+				if (x1 >= 0 && y1 >= 0 && z1 >= 0 && x2 < sx2 && y2 < sy2 && z2 < sz2){
+					// [i*sy*sz + j*sz + k]
+					x1syz2 = x1*syz2;
+					x2syz2 = x2*syz2;
+					y1sz2 = y1*sz2;
+					y2sz2 = y2*sz2;
+
+					q1 = h_t[x1syz2 + y1sz2 + z1];
+					q2 = h_t[x2syz2 + y1sz2 + z1];
+					q3 = h_t[x1syz2 + y2sz2 + z1];
+					q4 = h_t[x2syz2 + y2sz2 + z1];
+					q5 = h_t[x1syz2 + y1sz2 + z2];
+					q6 = h_t[x2syz2 + y1sz2 + z2];
+					q7 = h_t[x1syz2 + y2sz2 + z2];
+					q8 = h_t[x2syz2 + y2sz2 + z2];
+					t = itrilerp2(dx1, dx2, dy1, dy2, dz1, dz2, q1, q2, q3, q4, q5, q6, q7, q8);
+
+				}
+				else
+					t = 0;
+				s = h_s[i*syz + j*sz + k];
+
+				sqrSum += (double)t*t;
+				corrSum += (double)s*t;
+			}
+		}
+	}
+	return (corrSum / sqrt(sqrSum));
+}
+
+
+void affinetransformcpu(float *h_s,
+	float *h_t,// source stack
+	float *aff,
+	int sx,
+	int sy,
+	int sz,
+	int sx2,
+	int sy2,
+	int sz2
+	){
+	float ix, iy, iz, tx, ty, tz;
+	int x1, y1, z1, x2, y2, z2;
+	float dx1, dy1, dz1, dx2, dy2, dz2;
+	float q1, q2, q3, q4, q5, q6, q7, q8;
+	float t;
+	int syz = sy*sz, syz2 = sy2*sz2, x1syz2, x2syz2, y1sz2, y2sz2;
+	for (int i = 0; i < sx; i++){
+		ix = (float)i;
+		for (int j = 0; j < sy; j++){
+			iy = (float)j;
+			for (int k = 0; k < sz; k++){
+				iz = (float)k;
+				tx = aff[0] * ix + aff[1] * iy + aff[2] * iz + aff[3];
+				ty = aff[4] * ix + aff[5] * iy + aff[6] * iz + aff[7];
+				tz = aff[8] * ix + aff[9] * iy + aff[10] * iz + aff[11];
+				x1 = (int)tx; y1 = (int)ty; z1 = (int)tz;
+				x2 = x1 + 1; y2 = y1 + 1; z2 = z1 + 1;
+
+				dx1 = tx - (float)x1; dy1 = ty - (float)y1; dz1 = tz - (float)z1;
+				dx2 = 1 - dx1; dy2 = 1 - dy1; dz2 = 1 - dz1;
+				if (x1 >= 0 && y1 >= 0 && z1 >= 0 && x2 < sx2 && y2 < sy2 && z2 < sz2){
+					// [i*sy*sz + j*sz + k]
+					x1syz2 = x1*syz2;
+					x2syz2 = x2*syz2;
+					y1sz2 = y1*sz2;
+					y2sz2 = y2*sz2;
+
+					q1 = h_t[x1syz2 + y1sz2 + z1];
+					q2 = h_t[x2syz2 + y1sz2 + z1];
+					q3 = h_t[x1syz2 + y2sz2 + z1];
+					q4 = h_t[x2syz2 + y2sz2 + z1];
+					q5 = h_t[x1syz2 + y1sz2 + z2];
+					q6 = h_t[x2syz2 + y1sz2 + z2];
+					q7 = h_t[x1syz2 + y2sz2 + z2];
+					q8 = h_t[x2syz2 + y2sz2 + z2];
+					t = itrilerp2(dx1, dx2, dy1, dy2, dz1, dz2, q1, q2, q3, q4, q5, q6, q7, q8);
+
+				}
+				else
+					t = 0;
+				h_s[i*syz + j*sz + k] = t;
+			}
+		}
+	}
+}
+
+
+template <class T>
+void flipPSF(T *d_odata, T *d_idata, int sx, int sy, int sz){
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
+	flipPSFkernel<T> << <grids, threads >> >(d_odata, d_idata, sx, sy, sz);
+	cudaThreadSynchronize();
+}
+template void flipPSF<float>(float *d_odata, float *d_idata, int sx, int sy, int sz);
+template void flipPSF<double>(double *d_odata, double *d_idata, int sx, int sy, int sz);
+
+template <class T>
+void padPSF(T *d_PaddedPSF, T *d_PSF, int FFTx, int FFTy, int FFTz, int PSFx, int PSFy, int PSFz, int PSFox, int PSFoy, int PSFoz){
+	assert(d_PaddedPSF != d_PSF);
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(PSFx, threads.x), iDivUp(PSFy, threads.y), iDivUp(PSFz, threads.z));
+	padPSFKernel<T> << <grids, threads >> >(d_PaddedPSF, d_PSF, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, PSFox, PSFoy, PSFoz);
+	cudaThreadSynchronize();
+}
+
+template void
+padPSF<float>(float *d_PaddedPSF, float *d_PSF, int FFTx, int FFTy, int FFTz, int PSFx, int PSFy, int PSFz, int PSFox, int PSFoy, int PSFoz);
+
+template void
+padPSF<double>(double *d_PaddedPSF, double *d_PSF, int FFTx, int FFTy, int FFTz, int PSFx, int PSFy, int PSFz, int PSFox, int PSFoy, int PSFoz);
+
+template <class T>
+void padStack(T *d_PaddedStack, T *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz){
+	assert(d_PaddedStack != d_Stack);
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(FFTx, threads.x), iDivUp(FFTy, threads.y), iDivUp(FFTz, threads.z));
+	padStackKernel<T> << < grids, threads >> > (d_PaddedStack, d_Stack, FFTx, FFTy, FFTz, sx, sy, sz, imox, imoy, imoz);
+	cudaThreadSynchronize();
+}
+
+template void
+padStack<float>(float *d_PaddedStack, float *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz);
+
+template void
+padStack<double>(double *d_PaddedStack, double *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz);
+
+template <class T>
+void cropStack(T *d_PaddedStack, T *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz){
+	assert(d_PaddedStack != d_Stack);
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(sx, threads.x), iDivUp(sy, threads.y), iDivUp(sz, threads.z));
+	cropStackKernel<T> << < grids, threads >> > (d_PaddedStack, d_Stack, FFTx, FFTy, FFTz, sx, sy, sz, imox, imoy, imoz);
+	cudaThreadSynchronize();
+}
+
+template void
+cropStack<float>(float *d_PaddedStack, float *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz);
+
+template void
+cropStack<double>(double *d_PaddedStack, double *d_Stack, int FFTx, int FFTy, int FFTz, int sx, int sy, int sz, int imox, int imoy, int imoz);
+
+
+//*** new functions
+template <class T>
+void flipgpu(T *d_odata, T *d_idata, int sx, int sy, int sz){
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(sx, blockSize3Dx), iDivUp(sy, blockSize3Dy), iDivUp(sz, blockSize3Dz));
+	flipgpukernel<T> << <grids, threads >> >(d_odata, d_idata, sx, sy, sz);
+	cudaThreadSynchronize();
+}
+template void flipgpu<int>(int *d_odata, int *d_idata, int sx, int sy, int sz);
+template void flipgpu<float>(float *d_odata, float *d_idata, int sx, int sy, int sz);
+template void flipgpu<double>(double *d_odata, double *d_idata, int sx, int sy, int sz);
+
+template <class T>
+void padPSFgpu(T *d_odata, T *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz){
+	assert(d_odata != d_idata);
+	cudaMemset(d_odata, 0, sx*sy*sz*sizeof(T));
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(sx2, threads.x), iDivUp(sy2, threads.y), iDivUp(sz2, threads.z));
+	padPSFgpukernel<T> << <grids, threads >> >(d_odata, d_idata, sx, sy, sz, sx2, sy2, sz2, sox, soy, soz);
+	cudaThreadSynchronize();
+}
+template void
+padPSFgpu<int>(int *d_odata, int *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+template void
+padPSFgpu<float>(float *d_odata, float *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+template void
+padPSFgpu<double>(double *d_odata, double *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+
+template <class T>
+void padstackgpu(T *d_odata, T *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz){
+	assert(d_odata != d_idata);
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(sx, threads.x), iDivUp(sy, threads.y), iDivUp(sz, threads.z));
+	padstackgpukernel<T> << < grids, threads >> > (d_odata, d_idata, sx, sy, sz, sx2, sy2, sz2, sox, soy, soz);
+	cudaThreadSynchronize();
+}
+template void
+padstackgpu<int>(int *d_odata, int *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+template void
+padstackgpu<float>(float *d_odata, float *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+template void
+padstackgpu<double>(double *d_odata, double *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+
+template <class T>
+void cropgpu(T *d_odata, T *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz){
+	assert(d_odata != d_idata);
+	dim3 threads(blockSize3Dx, blockSize3Dy, blockSize3Dz);
+	dim3 grids(iDivUp(sx, threads.x), iDivUp(sy, threads.y), iDivUp(sz, threads.z));
+	cropgpukernel<T> << < grids, threads >> > (d_odata, d_idata, sx, sy, sz, sx2, sy2, sz2, sox, soy, soz);
+	cudaThreadSynchronize();
+}
+template void
+cropgpu<int>(int *d_odata, int *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+template void
+cropgpu<float>(float *d_odata, float *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
+template void
+cropgpu<double>(double *d_odata, double *d_idata, int sx, int sy, int sz, int sx2, int sy2, int sz2, int sox, int soy, int soz);
