@@ -56,8 +56,10 @@ cudaError_t __err = cudaGetLastError();
 								        } \
 				    } while (0)
 //concatenate any number of strings
+
 char* concat(int count, ...)
 {
+
 	va_list ap;
 	int i;
 
@@ -81,6 +83,7 @@ char* concat(int count, ...)
 		null_pos += strlen(s);
 	}
 	va_end(ap);
+
 
 	return merged;
 }
@@ -3000,7 +3003,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 		exit(1);
 	}
 	(void)gettifinfo(fileStack2, &imSizeIn2[0]);
-	//****************** Create output folders*****************//
+	// ****************** Create output folders***************** //
 	char *tmxFolder, *regFolder1, *regFolder2;
 	// flagSaveInterFiles: 3 elements --> 1: save files; 0: not
 	//					[0]: Intermediate outputs; [1]: reg A; [2]: reg B;
@@ -3044,7 +3047,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 #endif
 	}
 
-	//****************** calculate images' size *************************//
+	// ****************** calculate images' size ************************* //
 	int imx, imy, imz;
 	unsigned int imSize[3], imSize1[3], imSize2[3];
 	float pixelSize[3], pixelSizeTemp[3];
@@ -3136,7 +3139,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 
 	time_t now;
 	time(&now);
-	//****Write information to log file***
+	// ****Write information to log file***
 	f1 = fopen(fileLog, "w");
 	// print images information
 	fprintf(f1, "3D Registration: %s\n", ctime(&now));
@@ -3197,7 +3200,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 	fprintf(f1, "...Registration maximum sub-iteration number:%d\n", itLimit);
 	fprintf(f1, "\n...GPU Device %d is used...\n\n", deviceNum);
 	fclose(f1);
-	//****************** Processing Starts*****************//
+	// ****************** Processing Starts***************** //
 	// variables for memory and time cost records
 	clock_t startWhole, endWhole, start, end;
 	size_t totalMem = 0;
@@ -3296,7 +3299,7 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 			fprintf(f1, "...Registration...\n");
 			fprintf(f1, "	...Initializing (rotation, interpolation, initial matrix)...\n");
 			fclose(f1);
-			//****************Interpolation before registration****************//////
+			// ****************Interpolation before registration**************** //////
 			// ## check files
 			if (!fexists(fileStackA)){
 				printf("***File does not exist: %s", fileStackA);
@@ -3422,8 +3425,8 @@ int reg_3dgpu_batch(char *outMainFolder, char *folder1, char *folder2, char *fil
 			}
 			cudaFree(d_img3D);
 
-			///****** initialize matrix *******
-			// ***** Do 3D registration ******
+			/// initialize matrix *******
+			//  Do 3D registration ******
 			// regMode--> 0: no registration; 1: one image only
 			//			2: dependently, based on the results of last time point; 3: independently
 			cudaMemGetInfo(&freeMem, &totalMem);
@@ -3588,13 +3591,13 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 	else{
 		inFolder = folder;
 	}
-	//************get basic input images and PSFs information ******************
+	// ************get basic input images and PSFs information ******************
 	unsigned int  imSize[3], imSizeTemp[3], psfSize[3];
 	int imgNum = imgNumStart;
 	char imgNumStr[20];
 	sprintf(imgNumStr, "%d", imgNum);
 	char *fileStack = concat(4, inFolder, fileNamePrefix, imgNumStr, ".tif"); // TIFF file to get image information
-	//**** check image files and image size ***
+	// **** check image files and image size ***
 	unsigned short bitPerSample_input;
 	if (!fexists(fileStack)){
 		fprintf(stderr, "***File does not exist: %s\n", fileStack);
@@ -3630,7 +3633,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 		}
 	}
 
-	//****************** Create output folders*****************//
+	// ****************** Create output folders***************** //
 	char *deconFolder;
 	// flagSaveProjZ --> 1: save max projections; 0: not.
 	if (flagMultiColor){
@@ -3660,7 +3663,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 #endif
 	}
 
-	//****************** calculate images' size *************************//
+	// ****************** calculate images' size ************************* //
 	int imx, imy, imz;
 	imx = imSize[0]; imy = imSize[1]; imz = imSize[2]; // also as output size
 
@@ -3769,7 +3772,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 	fprintf(f1, "...Iteration number for deconvolution:%d\n", itNumForDecon);
 	fprintf(f1, "\n...GPU Device %d is used...\n\n", deviceNum);
 	fclose(f1);
-	//****************** Processing Starts*****************//
+	// ****************** Processing Starts***************** //
 	// variables for memory and time cost records
 	clock_t startWhole, endWhole;
 	size_t totalMem = 0;
@@ -3785,7 +3788,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 	fprintf(f1, "...GPU free memory at beginning is %.0f MBites\n", (float)freeMem / 1048576.0f);
 	fclose(f1);
 
-	//****************** Processing Starts*****************//
+	// ****************** Processing Starts***************** //
 	// variables for memory and time cost records
 	
 	// allocate memory
@@ -3886,7 +3889,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 				fileStack = concat(4, inFolder, fileNamePrefix, imgNumStr, ".tif");
 				fileDecon = concat(4, deconFolder, "Decon_", imgNumStr, ".tif");
 
-				//****************Interpolation before registration****************//////
+				// ****************Interpolation before registration**************** //////
 				// ## check files
 				if (!fexists(fileStack)){
 					printf("***File does not exist: %s", fileStack);
@@ -4030,7 +4033,7 @@ int decon_singleview_batch(char *outMainFolder, char *folder, char *fileNamePref
 				fileStack = concat(4, inFolder, fileNamePrefix, imgNumStr, ".tif");
 				fileDecon = concat(4, deconFolder, "Decon_", imgNumStr, ".tif");
 
-				//****************Interpolation before registration****************//////
+				// ****************Interpolation before registration**************** //////
 				// ## check files
 				if (!fexists(fileStack)){
 					printf("***File does not exist: %s", fileStack);
@@ -4202,7 +4205,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 		inFolder2 = folder2;
 	}
 
-	//************get basic input images and PSFs information ******************
+	// ************get basic input images and PSFs information ******************
 	unsigned int  imSizeIn1[3], imSizeIn2[3], psfSize[3], imSizeTemp[3];
 	int imgNum = imgNumStart;
 	if (regMode == 3)
@@ -4211,7 +4214,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 	sprintf(imgNumStr, "%d", imgNum);
 	char *fileStack1 = concat(4, inFolder1, fileNamePrefix1, imgNumStr, ".tif"); // TIFF file to get image information
 	char *fileStack2 = concat(4, inFolder2, fileNamePrefix2, imgNumStr, ".tif");
-	//**** check image files and image size ***
+	// **** check image files and image size ***
 	unsigned short bitPerSample_input;
 	if (!fexists(fileStack1)){
 		fprintf(stderr, "***File does not exist: %s\n", fileStack1);
@@ -4274,7 +4277,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 			exit(1);
 		}
 	}
-	//****************** Create output folders*****************//
+	// ****************** Create output folders***************** //
 	char *deconFolder, *tmxFolder, *regFolder1, *regFolder2,
 		*deconFolderMP_XY, *deconFolderMP_YZ, *deconFolderMP_ZX, *deconFolderMP_3D_X, *deconFolderMP_3D_Y;
 	// flagSaveInterFiles: 8 elements --> 1: save files; 0: not
@@ -4352,7 +4355,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 #endif
 	}
 
-	//****************** calculate images' size *************************//
+	// ****************** calculate images' size ************************* //
 	int imx, imy, imz;
 	unsigned int imSize[3], imSize1[3], imSize2[3];
 	float pixelSize[3], pixelSizeTemp[3];
@@ -4531,7 +4534,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 	fprintf(f1, "...Iteration number for joint deconvolution:%d\n", itNumForDecon);
 	fprintf(f1, "\n...GPU Device %d is used...\n\n", deviceNum);
 	fclose(f1);
-	//****************** Processing Starts*****************//
+	// ****************** Processing Starts***************** //
 	// variables for memory and time cost records
 	clock_t startWhole, endWhole, start, end;
 	size_t totalMem = 0;
@@ -4672,7 +4675,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 		fprintf(f1, "...Registration...\n");
 		fprintf(f1, "	...Initializing (rotation, interpolation, initial matrix)...\n");
 		fclose(f1);
-		//****************Interpolation before registration****************//////
+		// ****************Interpolation before registration**************** //////
 		// ## check files
 		if (!fexists(fileStackA)){
 			printf("***File does not exist: %s", fileStackA);
@@ -4799,7 +4802,7 @@ int fusion_dualview_batch(char *outMainFolder, char *folder1, char *folder2, cha
 		}
 		cudaFree(d_img3D);
 
-		///****** initialize matrix *******
+		/// ****** initialize matrix *******
 		// ***** Do 3D registration ******
 		// regMode--> 0: no registration; 1: one image only
 		//			2: dependently, based on the results of last time point; 3: independently
