@@ -1814,9 +1814,12 @@ int decon_dualview_batch(float *h_decon, float *h_img1, float *h_img2, unsigned 
 	// FFT size
 	long long int
 		FFTx, FFTy, FFTz;
-	FFTx = long long int(otfSize[0]);
-	FFTy = long long int(otfSize[1]);
-	FFTz = long long int(otfSize[2]);
+	//FFTx = long long int(otfSize[0]);
+	//FFTy = long long int(otfSize[1]);
+	//FFTz = long long int(otfSize[2]);
+	FFTx = otfSize[0];
+	FFTy = otfSize[1];
+	FFTz = otfSize[2];
 
 	// total pixel count for each images
 	long long int totalSize = imx*imy*imz; // in floating format

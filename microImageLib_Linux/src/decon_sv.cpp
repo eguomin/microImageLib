@@ -1,5 +1,4 @@
-/* Driver for routine powell */
-
+#include <string.h> 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>       // va_*
@@ -200,9 +199,16 @@ int main(int argc, char* argv[])
 	}
 	printf("=====================================================\n\n");
 	
+	long long int sx1 = imSize[0];
+	long long int sy1 = imSize[1];
+	long long int sz1 = imSize[2];
+	long long int sx2 = psfSize[0];
+	long long int sy2 = psfSize[1];
+	long long int sz2 = psfSize[2];
 
-	long long int totalSize = (long long int(imSize[0])) * (long long int(imSize[1])) * (long long int(imSize[2]));
-	long long int totalSizePSF = (long long int(psfSize[0])) * (long long int(psfSize[1])) * (long long int(psfSize[2]));
+	long long int totalSize = sx1 * sy1 * sz1;
+	long long int totalSizePSF = sx2 * sy2 * sz2;
+
 	float *h_decon = (float *)malloc(totalSize * sizeof(float));
 	float *h_img = (float *)malloc(totalSize * sizeof(float));
 	float *h_psf = (float *)malloc(totalSizePSF * sizeof(float));

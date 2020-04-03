@@ -1876,8 +1876,8 @@ int reg2d_phasor1(long long int *shiftXY, float *d_img1, float *d_img2, long lon
 	float *d_phasor2 = (float *)d_Spectrum2;
 	circshiftgpu(d_phasor2, d_phasor1, sx, sy, 1, round(sx / 2), round(sy / 2), 0);
 	float peakValue = max3Dgpu(&corXYZ[0], d_phasor2, sx, sy, 1);
-	shiftXY[0] = long long int(corXYZ[0]) - sx / 2;
-	shiftXY[1] = long long int(corXYZ[1]) - sy / 2;
+	shiftXY[0] = corXYZ[0] - sx / 2;
+	shiftXY[1] = corXYZ[1] - sy / 2;
 	cudaFree(d_Spectrum1);
 	cudaFree(d_Spectrum2);
 
@@ -2214,9 +2214,9 @@ int reg3d_phasor1(long long int *shiftXYZ, float *d_img1, float *d_img2, long lo
 	float *d_phasor2 = (float *)d_Spectrum2;
 	circshiftgpu(d_phasor2, d_phasor1, sx, sy, sz, round(sx / 2), round(sy / 2), round(sz / 2));
 	float peakValue = max3Dgpu(&corXYZ[0], d_phasor2, sx, sy, sz);
-	shiftXYZ[0] = long long int(corXYZ[0]) - sx / 2;
-	shiftXYZ[1] = long long int(corXYZ[1]) - sy / 2;
-	shiftXYZ[2] = long long int(corXYZ[2]) - sz / 2;
+	shiftXYZ[0] = corXYZ[0] - sx / 2;
+	shiftXYZ[1] = corXYZ[1] - sy / 2;
+	shiftXYZ[2] = corXYZ[2] - sz / 2;
 	cudaFree(d_Spectrum1);
 	cudaFree(d_Spectrum2);
 	
@@ -2346,9 +2346,9 @@ int reg3d_phasor2(long long int *shiftXYZ, float *h_img1, float *h_img2, long lo
 	float *d_phasor2 = (float *)d_Spectrum2;
 	circshiftgpu(d_phasor2, d_img, sx, sy, sz, round(sx / 2), round(sy / 2), round(sz / 2));
 	float peakValue = max3Dgpu(&corXYZ[0], d_phasor2, sx, sy, sz);
-	shiftXYZ[0] = long long int(corXYZ[0]) - sx / 2;
-	shiftXYZ[1] = long long int(corXYZ[1]) - sy / 2;
-	shiftXYZ[2] = long long int(corXYZ[2]) - sz / 2;
+	shiftXYZ[0] = corXYZ[0] - sx / 2;
+	shiftXYZ[1] = corXYZ[1] - sy / 2;
+	shiftXYZ[2] = corXYZ[2] - sz / 2;
 	cudaFree(d_Spectrum1);
 	cudaFree(d_Spectrum2);
 

@@ -1,3 +1,4 @@
+#include <string.h> 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>       // va_*
@@ -271,10 +272,16 @@ int main(int argc, char* argv[])
 	}
 	printf("=====================================================\n\n");
 
+	
+	long long int sx1 = imSize1[0];
+	long long int sy1 = imSize1[1];
+	long long int sz1 = imSize1[2];
+	long long int sx2 = imSize2[0];
+	long long int sy2 = imSize2[1];
+	long long int sz2 = imSize2[2];
 
-
-	long long int totalSize1 = (long long int(imSize1[0])) * (long long int(imSize1[1])) * (long long int(imSize1[2]));
-	long long int totalSize2 = (long long int(imSize2[0])) * (long long int(imSize2[1])) * (long long int(imSize2[2]));
+	long long int totalSize1 = sx1 * sy1 * sz1;
+	long long int totalSize2 = sx2 * sy2 * sz2;
 	float *h_reg = (float *)malloc(totalSize1 * sizeof(float));
 	float *h_img1 = (float *)malloc(totalSize1 * sizeof(float));
 	float *h_img2 = (float *)malloc(totalSize2 * sizeof(float));
