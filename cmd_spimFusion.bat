@@ -1,0 +1,1 @@
+.\bin\win\spimFusion -i1 .\data\SPIMA\SPIMA_0.tif -i2 .\data\SPIMB\SPIMB_0.tif -fp1 .\data\PSFA.tif -fp2 .\data\PSFB.tif -o .\data\results\Decon_0.tif -it 10 -cOFF -imgrot -1 -dev 0 -verbON -oreg1 .\data\results\regA_0.tif -oreg2 .\data\results\regB_0.tif -otmx .\data\results\regB_0.tmx

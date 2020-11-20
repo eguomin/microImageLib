@@ -1,0 +1,56 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Release\) contains files shared from another project (deconDualView.vcxproj, deconSingleView.vcxproj, spimFusion.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  spim_fusion_batch.cpp
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(40): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\string.h(125): note: see declaration of 'strcpy'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(219): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\string.h(125): note: see declaration of 'strcpy'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(369): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(370): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(371): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(372): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(373): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(591): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(595): warning C4244: 'initializing': conversion from 'double' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(599): warning C4244: 'initializing': conversion from 'double' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(749): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(336): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(1769): note: see declaration of 'sprintf'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(454): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(456): warning C4996: 'ctime': This function or variable may be unsafe. Consider using ctime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\time.h(475): note: see declaration of 'ctime'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(578): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(579): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(1192): note: see declaration of 'fscanf'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(615): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(618): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(1769): note: see declaration of 'sprintf'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(625): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(656): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(772): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(782): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(798): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(811): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(871): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion_batch.cpp(901): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+  Generating code
+  1 of 23 functions ( 4.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  spimFusionBatch.vcxproj -> C:\Programs\GitHub\gpuPackage\microImageLib\vcxprojs\spimFusionBatch\..\..\bin\win\spimFusionBatch.exe
+  copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart*.dll" "..\..\bin\win\"
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart32_100.dll
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart64_100.dll
+          2 file(s) copied.

@@ -1,0 +1,27 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Release\) contains files shared from another project (deconDualView.vcxproj, deconSingleView.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  spim_fusion.cpp
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(98): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(99): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(119): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(339): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(340): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(341): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(342): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(343): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(614): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(617): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(1192): note: see declaration of 'fscanf'
+c:\programs\github\gpupackage\microimagelib\src\spim_fusion.cpp(634): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+  Generating code
+  0 of 10 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  spimFusion.vcxproj -> C:\Programs\GitHub\gpuPackage\microImageLib\vcxprojs\spimFusion\..\..\bin\win\spimFusion.exe
+  copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart*.dll" "..\..\bin\win\"
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart32_100.dll
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart64_100.dll
+          2 file(s) copied.

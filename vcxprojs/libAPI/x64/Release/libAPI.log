@@ -1,0 +1,511 @@
+﻿  
+  C:\Programs\GitHub\gpuPackage\microImageLib\vcxprojs\libAPI>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu  -I..\..\lib -I..\..\src -I..\..\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile      -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_WINDLL -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2  /FS /Zi  /MT " -o x64\Release\api_subfunc.cu.obj "C:\Programs\GitHub\gpuPackage\microImageLib\src\api_subfunc.cu" -clean 
+  api_subfunc.cu
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  Compiling CUDA source file ..\..\src\api_subfunc.cu...
+  
+  C:\Programs\GitHub\gpuPackage\microImageLib\vcxprojs\libAPI>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu  -I..\..\lib -I..\..\src -I..\..\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_WINDLL -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Fdx64\Release\vc141.pdb /FS /Zi  /MT " -o x64\Release\api_subfunc.cu.obj "C:\Programs\GitHub\gpuPackage\microImageLib\src\api_subfunc.cu" 
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(824): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(1759): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(2621): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(3460): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(4403): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(5301): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(6212): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(7093): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(7892): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt/device_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt/device_functions.h(772): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt/device_functions.h(1628): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\device_double_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\sm_20_intrinsics.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\sm_20_intrinsics.h(925): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1299): warning : variable "syz" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1299): warning : variable "syz2" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1844): warning : expression has no effect
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizex1" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizex2" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizey1" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizey2" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizez1" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizez2" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizex" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizey" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning : variable "sizez" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1899): warning : variable "imSizeCropz" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1900): warning : variable "imoz" was declared but never referenced
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2041): warning : expression has no effect
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2047): warning : expression has no effect
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3290): warning : statement is unreachable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3252): warning : variable "start" was set but never used
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3252): warning : variable "end" was set but never used
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3322): warning : variable "start" was set but never used
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3322): warning : variable "end" was set but never used
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3413): warning : variable "start" was set but never used
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3413): warning : variable "end" was set but never used
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(824): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(1759): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(2621): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(3460): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(4403): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(5301): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(6212): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(7093): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(7892): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt/device_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt/device_functions.h(772): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt/device_functions.h(1628): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\device_double_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\sm_20_intrinsics.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\sm_20_intrinsics.h(925): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1844): warning : expression has no effect
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2041): warning : expression has no effect
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2047): warning : expression has no effect
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3290): warning : statement is unreachable
+  api_subfunc.cu
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(62): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(85): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(307): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(309): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(316): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(318): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(326): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(328): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(347): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(349): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(655): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(661): warning C4244: '=': conversion from 'double' to '__int64', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(663): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(675): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(681): warning C4244: '=': conversion from 'double' to '__int64', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(683): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(694): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(700): warning C4244: '=': conversion from 'double' to '__int64', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(702): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(744): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(745): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(746): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(755): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(756): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(757): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(766): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(767): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(768): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(894): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(906): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(918): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(923): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(928): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(933): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(939): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(964): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(967): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1009): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1011): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1023): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1024): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1026): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1119): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1131): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1670): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1843): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1844): warning C4551: function call missing argument list
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1857): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1858): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1865): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1872): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1878): warning C4244: 'argument': conversion from 'double' to '__int64', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizex': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizez': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizey2': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizey': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizex2': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1899): warning C4101: 'imSizeCropz': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizex1': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizez1': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1900): warning C4101: 'imoz': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizez2': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1892): warning C4101: 'sizey1': unreferenced local variable
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2007): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2008): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2015): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2041): warning C4551: function call missing argument list
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2046): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2047): warning C4551: function call missing argument list
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2052): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2078): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2094): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2126): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2158): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2184): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2195): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2196): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2203): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2210): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2216): warning C4244: 'argument': conversion from 'double' to '__int64', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2321): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2322): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2331): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2343): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2348): warning C4244: 'argument': conversion from 'double' to '__int64', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2520): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2559): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2580): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2591): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2647): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2662): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2667): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2672): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2783): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2823): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2845): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2858): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2914): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2929): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2934): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(2939): warning C4305: 'argument': truncation from 'double' to 'float'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3026): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3062): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3063): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3064): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3122): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3123): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3200): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3201): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3273): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3274): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3275): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3350): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3351): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3452): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(3453): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(824): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(1759): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(2621): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(3461): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(4403): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(5301): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(6212): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(7093): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\crt\math_functions.h(7892): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(246): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(250): note: see reference to function template instantiation 'void add3Dgpu<int>(int *,int *,int *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(248): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(258): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(262): note: see reference to function template instantiation 'void addvaluegpu<int>(int *,int *,int,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(260): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(270): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(274): note: see reference to function template instantiation 'void sub3Dgpu<int>(int *,int *,int *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(272): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(283): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(287): note: see reference to function template instantiation 'void multi3Dgpu<int>(int *,int *,int *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(285): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(295): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(299): note: see reference to function template instantiation 'void multivaluegpu<int>(int *,int *,int,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(297): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(335): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(339): note: see reference to function template instantiation 'void div3Dgpu<int>(int *,int *,int *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(337): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(356): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(380): note: see reference to function template instantiation 'int sumgpu<int>(int *,int)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(369): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(392): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(404): note: see reference to function template instantiation 'double sum3Dgpu<int>(int *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(394): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(421): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(431): note: see reference to function template instantiation 'int sumgpu1D<int>(int *,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(446): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(471): note: see reference to function template instantiation 'int max3Dgpu<int>(size_t *,int *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(448): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(451): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(479): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(483): note: see reference to function template instantiation 'void maxvalue3Dgpu<int>(int *,int *,int,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(481): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(502): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(507): note: see reference to function template instantiation 'void maxprojection<int>(int *,int *,size_t,size_t,size_t,int)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(504): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(518): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(522): note: see reference to function template instantiation 'void changestorageordergpu<int>(int *,int *,size_t,size_t,size_t,int)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(520): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(533): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(537): note: see reference to function template instantiation 'void rotbyyaxis<int>(int *,int *,size_t,size_t,size_t,int)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(535): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(830): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(834): note: see reference to function template instantiation 'void circshiftgpu<int>(int *,int *,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(832): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(841): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(845): note: see reference to function template instantiation 'void imshiftgpu<int>(int *,int *,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(843): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(862): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(864): note: see reference to function template instantiation 'void cudacopyhosttoarray<unsigned short>(cudaArray *,cudaChannelFormatDesc,unsigned short *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(877): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(879): note: see reference to function template instantiation 'void cudacopydevicetoarray<unsigned short>(cudaArray *,cudaChannelFormatDesc,unsigned short *,size_t,size_t,size_t)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(945): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(949): note: see reference to function template instantiation 'void affineTransform<unsigned short>(unsigned short *,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(947): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1680): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1684): note: see reference to function template instantiation 'void flipgpu<int>(int *,int *,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1682): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1696): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1700): note: see reference to function template instantiation 'void padPSFgpu<int>(int *,int *,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1698): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1719): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1723): note: see reference to function template instantiation 'void padstackgpu<int>(int *,int *,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1721): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1742): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1746): note: see reference to function template instantiation 'void cropgpu<int>(int *,int *,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1744): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1761): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1765): note: see reference to function template instantiation 'void cropgpu2<int>(int *,int *,__int64,__int64,__int64,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1763): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1785): warning C4244: 'argument': conversion from '__int64' to 'unsigned int', possible loss of data
+  C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1789): note: see reference to function template instantiation 'void alignsize3Dgpu<int>(int *,int *,__int64,__int64,__int64,__int64,__int64,__int64)' being compiled
+C:/Programs/GitHub/gpuPackage/microImageLib/src/api_subfunc.cu(1787): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+  apifunc.cpp
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(62): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(74): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\string.h(125): note: see declaration of 'strcpy'
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(75): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(84): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(106): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\string.h(125): note: see declaration of 'strcpy'
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(368): warning C4477: 'printf' : format string '%lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'size_t'
+  c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(368): note: consider using '%zu' in the format string
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(369): warning C4477: 'printf' : format string '%lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'size_t'
+  c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(369): note: consider using '%zu' in the format string
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(382): warning C4477: 'printf' : format string '%lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'size_t'
+  c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(382): note: consider using '%zu' in the format string
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(383): warning C4477: 'printf' : format string '%lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'size_t'
+  c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(383): note: consider using '%zu' in the format string
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(441): warning C4244: '=': conversion from '__int64' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(442): warning C4244: '=': conversion from '__int64' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(510): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(511): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(513): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(547): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(563): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(584): warning C4244: '=': conversion from 'double' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(588): warning C4244: '=': conversion from 'double' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(597): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(620): warning C4244: '=': conversion from '__int64' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(635): warning C4244: '=': conversion from '__int64' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(618): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+c:\programs\github\gpupackage\microimagelib\src\apifunc.cpp(633): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+  api_decon.cpp
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(72): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(73): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(74): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 3 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(77): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 3 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(78): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 3 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(79): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(111): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(112): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(131): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(363): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(364): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(365): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 3 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(369): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 3 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(370): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 3 has type '__int64'
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%lld' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%Id' in the format string
+  c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(371): note: consider using '%I64d' in the format string
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(404): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(405): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(424): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(440): warning C4101: 'd_FlippedPSFSpectrum': unreferenced local variable
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(786): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(787): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(806): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(822): warning C4101: 'd_FlippedPSFSpectrum': unreferenced local variable
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(821): warning C4101: 'd_PSFSpectrum': unreferenced local variable
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1082): warning C4244: '=': conversion from 'float' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1083): warning C4244: '=': conversion from 'float' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1084): warning C4244: '=': conversion from '__int64' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1099): warning C4244: '=': conversion from 'float' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1100): warning C4244: '=': conversion from 'float' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1101): warning C4244: '=': conversion from 'float' to '__int64', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1102): warning C4244: '=': conversion from '__int64' to 'unsigned int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1113): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1114): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1115): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1145): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1146): warning C4244: 'argument': conversion from '__int64' to 'int', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1204): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+c:\programs\github\gpupackage\microimagelib\src\api_decon.cpp(1235): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+  api_reg.cpp
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(72): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(100): warning C4996: 'cudaThreadSynchronize': was declared deprecated
+  c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h(947): note: see declaration of 'cudaThreadSynchronize'
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(164): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(205): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(206): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(237): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(360): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(404): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(405): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(406): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(418): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(419): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(420): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(440): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(441): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(442): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(495): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(496): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(497): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(511): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(512): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(513): warning C4244: '=': conversion from '__int64' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_reg.cpp(367): warning C4101: 'im2DSize': unreferenced local variable
+  api_powell.c
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(131): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(132): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(141): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(143): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(147): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(153): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(157): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(159): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(205): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(211): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(211): warning C4305: '=': truncation from 'double' to 'float'
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(212): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(227): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(233): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(242): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(294): warning C4305: 'function': truncation from 'double' to 'float'
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(317): warning C4098: 'powell': 'void' function returning a value
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(328): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(331): warning C4098: 'powell': 'void' function returning a value
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(332): warning C4098: 'powell': 'void' function returning a value
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(340): warning C4098: 'powell': 'void' function returning a value
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(342): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(348): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(355): warning C4098: 'powell': 'void' function returning a value
+c:\programs\github\gpupackage\microimagelib\src\api_powell.c(356): warning C4098: 'powell': 'void' function returning a value
+     Creating library ..\..\bin\win\libapi.lib and object ..\..\bin\win\libapi.exp
+  Generating code
+  All 47 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  libAPI.vcxproj -> C:\Programs\GitHub\gpuPackage\microImageLib\vcxprojs\libAPI\..\..\bin\win\libapi.dll
+  copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart*.dll" "..\..\bin\win\"
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart32_100.dll
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\cudart64_100.dll
+          2 file(s) copied.
