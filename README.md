@@ -19,7 +19,7 @@ A collection of 3D image processing functions and applications with GPU implemen
 
 **1. Windows 10**
 
-The TIFF library and FFTW libraries are required and already included in this repo as lib dependencies. Users only need to open the Visual Studio solution
+The TIFF library and FFTW libraries are required and already included in this repo as lib dependencies. Users only need to open the Visual Studio solution file:
 
 ```posh
 microImageLib.sln
@@ -44,7 +44,7 @@ make
 ```
 The compiling generates binary library and applications in the folder `./bin/linux`.
 
-To clean the built results, use option `-clean` remove built objects or `-cleanAll` to remove both built objects and binary output:
+To clean the built results, use option `-clean` to remove built objects or `-cleanAll` to remove both built objects and binary outputs:
 ```posh
 make -clean
 (or) make -cleanAll
