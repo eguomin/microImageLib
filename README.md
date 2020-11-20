@@ -58,7 +58,7 @@ Users can use command with option `-h` or `-help` to find the introduction and m
 spimFusion -h
 ```
 
-Users can also download [a test dataset with a few example scripts](https://www.dropbox.com/sh/czn4kwzwcgy0s3x/AADipfEsUSwuCsEBg8P7wc4_a?dl=0). The example scripts are a group of cmd or shell commands that invoke the binary applications with configurations for the test dataset. To run the scripts, users need to open the command terminal and get to the directory of the scripts, i.e., the folder `./cudaLib`.
+Users can also download [a test dataset with a few example scripts](https://www.dropbox.com/sh/czn4kwzwcgy0s3x/AADipfEsUSwuCsEBg8P7wc4_a?dl=0). The example scripts are a group of *cmd* or *shell* commands that invoke the binary applications with configurations for the test dataset. To run the scripts, users need to open the command terminal and get to the directory of the scripts, i.e., the folder `./cudaLib`.
 
 1) For Windows PC, run any of the `cmd_xx.bat` scripts, e.g.
 ```posh
@@ -78,4 +78,4 @@ sh sh_spimFusionBatch.sh
 
 <a id="1">[1]</a>
 Min Guo *et al.* (2020).
-"Rapid image deconvolution and multiview fusion for optical microscopy." Nature Biotechnology (2020): 1-10.
+"Rapid image deconvolution and multiview fusion for optical microscopy." Nature Biotechnology (2020): 1-10. https://doi.org/10.1038/s41587-020-0560-x
