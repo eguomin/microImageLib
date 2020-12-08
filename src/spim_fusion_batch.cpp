@@ -823,7 +823,7 @@ int main(int argc, char* argv[])
 				fprintf(f1, "	...GPU memory fully optimized, running in memory saved mode !!!\n");
 				break;
 			default:
-				fprintf(f1, "	...Not enough GPU memory, no deconvolution performed !!!\n");
+				fprintf(f1, "	...GPU mode error, no deconvolution performed !!!\n");
 			}
 			//fprintf(f1, "	...all iteration time cost: %2.3f s\n", deconRecords[8]);
 			fprintf(f1, "	...deconvolution time cost: %2.3f s\n", deconRecords[9]);
@@ -833,7 +833,7 @@ int main(int argc, char* argv[])
 			time3 = clock();
 			printf("\tTime cost for  deconvolution: %2.3f s\n", (float)(time3 - time2) / CLOCKS_PER_SEC);
 
-			///********* save max projections
+			// ********* save max projections
 			if ((flagSaveInterFiles[3] == 1) || (flagSaveInterFiles[4] == 1) || (flagSaveInterFiles[5] == 1)) {
 				// 2D MP max projections
 				(void)mp2dgpu(h_MP, &imSizeMP[0], h_decon, &imSize[0], (bool)flagSaveInterFiles[3], (bool)flagSaveInterFiles[4], (bool)flagSaveInterFiles[5]);
@@ -851,14 +851,22 @@ int main(int argc, char* argv[])
 					writetifstack(fileDeconMP_ZX, &h_MP[sx*sy + sy * sz], &tempSize[0], bitPerSample);
 				}
 			}
-			if (flagSaveInterFiles[6] == 1) { // 3D max projections: X-axis
-				(void)mip3dgpu(h_MP3D1, &imSizeMP[0], h_decon, &imSize[0], 1, projectNum);
-				writetifstack(fileDeconMP_3D_X, h_MP3D1, &imSizeMP[0], bitPerSample);
+			
+			// 3D MIP projection: if CPU mode deconvolution (not enough GPU memory), diable 3D MIP projections 
+			if (gpuMemModeActual > 0) {
+				if (flagSaveInterFiles[6] == 1) { // 3D max projections: X-axis
+					(void)mip3dgpu(h_MP3D1, &imSizeMP[0], h_decon, &imSize[0], 1, projectNum);
+					writetifstack(fileDeconMP_3D_X, h_MP3D1, &imSizeMP[0], bitPerSample);
+				}
+				if (flagSaveInterFiles[7] == 1) { // 3D max projections: X-axis
+					(void)mip3dgpu(h_MP3D2, &imSizeMP[0], h_decon, &imSize[0], 2, projectNum);
+					writetifstack(fileDeconMP_3D_Y, h_MP3D2, &imSizeMP[0], bitPerSample);
+				}
 			}
-			if (flagSaveInterFiles[7] == 1) { // 3D max projections: X-axis
-				(void)mip3dgpu(h_MP3D2, &imSizeMP[0], h_decon, &imSize[0], 2, projectNum);
-				writetifstack(fileDeconMP_3D_Y, h_MP3D2, &imSizeMP[0], bitPerSample);
+			else {
+				printf("... CPU deconvolution: no 3D MIP generated\n");
 			}
+
 			time4 = clock();
 
 			/* issue when freeing char pointers ???? **************************
