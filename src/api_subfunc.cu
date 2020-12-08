@@ -3048,7 +3048,7 @@ int decon_singleview_OTF0(float *h_decon, float *h_img, fftwf_complex *h_OTF, ff
 	fftwf_complex *h_StackESpectrum = (fftwf_complex *)malloc(totalSizeSpectrum * sizeof(fftwf_complex));
 
 	// initialize estimation
-	maxvaluecpu(h_StackA, h_StackA, (float)(SMALLVALUE), totalSize);
+	maxvaluecpu(h_StackA, h_StackA, float(SMALLVALUE), totalSize);
 	// initialize estimation
 	if (flagConstInitial) { // use constant mean value as initial
 		float meanValue = (float)sumcpu(h_StackA, totalSize);
@@ -3074,6 +3074,7 @@ int decon_singleview_OTF0(float *h_decon, float *h_img, fftwf_complex *h_OTF, ff
 		multicomplexcpu((fComplex *)h_StackESpectrum, (fComplex *)h_StackESpectrum, (fComplex *)h_OTF_bp, sx * sy * (sz / 2 + 1));
 		fftwf_execute(spectrum2StackT);
 		multicpu(h_StackE, h_StackE, h_StackT, totalSize);//
+		maxvaluecpu(h_StackE, h_StackE, float(SMALLVALUE), totalSize);
 	}
 	free(h_StackT);
 	free(h_StackESpectrum);
@@ -3256,8 +3257,8 @@ int decon_dualview_OTF0(float *h_decon, float *h_img1, float *h_img2, fftwf_comp
 	fftwf_complex *h_StackESpectrum = (fftwf_complex *)malloc(totalSizeSpectrum * sizeof(fftwf_complex));
 
 	// initialize estimation
-	maxvaluecpu(h_StackA, h_StackA, (float)(SMALLVALUE), totalSize);
-	maxvaluecpu(h_StackB, h_StackB, (float)(SMALLVALUE), totalSize);
+	maxvaluecpu(h_StackA, h_StackA, float(SMALLVALUE), totalSize);
+	maxvaluecpu(h_StackB, h_StackB, float(SMALLVALUE), totalSize);
 	// initialize estimation
 	if (flagConstInitial) { // use constant mean value as initial
 		float meanValue1 = (float)sumcpu(h_StackA, totalSize);
@@ -3286,7 +3287,8 @@ int decon_dualview_OTF0(float *h_decon, float *h_img1, float *h_img2, fftwf_comp
 		multicomplexcpu((fComplex *)h_StackESpectrum, (fComplex *)h_StackESpectrum, (fComplex *)h_OTF_bp1, sx * sy * (sz / 2 + 1));
 		fftwf_execute(spectrum2StackT);
 		multicpu(h_StackE, h_StackE, h_StackT, totalSize);//
-		return 0;
+		maxvaluecpu(h_StackE, h_StackE, float(SMALLVALUE), totalSize);
+		// return 0;
 		fftwf_execute(stackE2Spectrum);
 		multicomplexcpu((fComplex *)h_StackESpectrum, (fComplex *)h_StackESpectrum, (fComplex *)h_OTF2, sx * sy * (sz / 2 + 1));
 		fftwf_execute(spectrum2StackT);
@@ -3297,6 +3299,7 @@ int decon_dualview_OTF0(float *h_decon, float *h_img1, float *h_img2, fftwf_comp
 		multicomplexcpu((fComplex *)h_StackESpectrum, (fComplex *)h_StackESpectrum, (fComplex *)h_OTF_bp2, sx * sy * (sz / 2 + 1));
 		fftwf_execute(spectrum2StackT);
 		multicpu(h_StackE, h_StackE, h_StackT, totalSize);//
+		maxvaluecpu(h_StackE, h_StackE, float(SMALLVALUE), totalSize);
 	}
 	free(h_StackT);
 	free(h_StackESpectrum);
