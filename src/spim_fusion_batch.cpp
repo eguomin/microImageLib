@@ -799,6 +799,7 @@ int main(int argc, char* argv[])
 			fprintf(f1, "...Deconvolution...\n");
 			fclose(f1);
 			memset(h_decon, 0, totalSize * sizeof(float));
+			// gpuMemMode = 2;
 			(void)decon_dualview(h_decon, h_img1, h_img2Reg, &imSize[0], h_psf1, h_psf2, &psfSize[0], flagConstInitial,
 				itNumForDecon, deviceNum, gpuMemMode, verbose, deconRecords, flagUnmatch, h_psf1_bp, h_psf2_bp);
 			int gpuMemModeActual = int(deconRecords[0]);
@@ -810,6 +811,8 @@ int main(int argc, char* argv[])
 
 			f1 = fopen(fileLog, "a");
 			switch (gpuMemModeActual) {
+			case 0:
+				fprintf(f1, "	...All deconvolution performed with CPU !!!\n");
 			case 1:
 				fprintf(f1, "	...Sufficient GPU memory, running in efficient mode !!!\n");
 				break;
@@ -858,6 +861,7 @@ int main(int argc, char* argv[])
 			}
 			time4 = clock();
 
+			/* issue when freeing char pointers ???? **************************
 			// release file names
 			if (flagMultiColor) {
 				free(outFolder); free(inFolder1); free(inFolder2); free(deconFolder); free(tmxFolder); free(regFolder1); //
@@ -867,6 +871,7 @@ int main(int argc, char* argv[])
 			free(fileImg1); free(fileImg2); free(fileReg1); free(fileReg2); free(fileDecon); //
 			free(fileTmx);  free(fileDeconMP_XY); free(fileDeconMP_YZ); free(fileDeconMP_ZX);
 			free(fileDeconMP_3D_X); free(fileDeconMP_3D_Y);
+			*/
 			printf("...Time cost for current image is %2.3f s\n", (float)(time4 - time0) / CLOCKS_PER_SEC);
 			f1 = fopen(fileLog, "a");
 			fprintf(f1, "...Time cost for current image is %2.3f s\n", (float)(time4 - time0) / CLOCKS_PER_SEC);
