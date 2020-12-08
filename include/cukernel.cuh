@@ -739,7 +739,7 @@ __global__ void cropgpukernel(T *d_odata, T *d_idata, long long int sx, long lon
 	const long long int x = blockDim.x * blockIdx.x + threadIdx.x;
 	const long long int y = blockDim.y * blockIdx.y + threadIdx.y;
 	const long long int z = blockDim.z * blockIdx.z + threadIdx.z;
-	if (x < sx2 && y < sy2 && z < sz2){
+	if (x < sx && y < sy && z < sz){
 		long long int dx, dy, dz;
 		dx = sox + x; dy = soy + y; dz = soz + z;
 		//d_odata[z*sy*sx + y*sx + x] = d_idata[dz*sy2*sx2 + dy*sx2 + dx];
