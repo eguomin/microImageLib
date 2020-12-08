@@ -29,11 +29,11 @@ void helpmessage(char *appName, bool flagHelp) {
 	printf("\t-it <int>\t\tIteration number of the deconvolution [20]\n");
 	printf("\t-gm <int>\t\tChoose CPU or GPU processing [-1]\n");
 	printf("\t\t\t\t-1: automatically choose\n");
-	printf("\t\t\t\t0: all in CPU (currently does not work)\n");
+	printf("\t\t\t\t0: all in CPU\n");
 	printf("\t\t\t\t1: efficient GPU mode if enough GPU memory\n");
 	printf("\t\t\t\t2: memory-saved GPU mode if insufficient GPU memroy\n");
 	printf("\t-dev <int>\t\tSpecify the GPU device if multiple GPUs on board [0]\n");
-	printf("\t-cON or -cOFF\t\tON: constant as initialization; OFF: input image as initialization [OFF]\n");
+	printf("\t-cON or -cOFF\t\tcON: constant as initialization; cOFF: input image as initialization [cOFF]\n");
 	printf("\t-bit <int>\t\tSpecify output image bit: 16 or 32 [same as input image]\n");
 	printf("\t-verbON or -verbOFF\tTurn on/off verbose information [ON]\n");
 	printf("\t-log <filename>\t\tLog filename [no log file] (currently does not work)\n");
