@@ -57,14 +57,19 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 	//[0]:  the actual GPU memory mode used;
 	//[1] -[5]: initial GPU memory, after variables partially allocated, during processing, after processing, after variables released ( all in MB);
 	//[6] -[9]: initializing time, prepocessing time, decon time, total time;	
+
+	// *************** switch x and z size *****************
+	// **** due to the different data storage way of C and FFT library
+	// **** Previously operation on images by functions changestorageordercpu and changestorageordergpu
+
 	// image size
 	long long int
 		imx, imy, imz;
-	imx = imSize[0], imy = imSize[1], imz = imSize[2];
+	imz = imSize[0], imy = imSize[1], imx = imSize[2];
 	// PSF size
 	long long int
 		PSFx, PSFy, PSFz;
-	PSFx = psfSize[0], PSFy = psfSize[1], PSFz = psfSize[2];
+	PSFz = psfSize[0], PSFy = psfSize[1], PSFx = psfSize[2];
 	// FFT size
 	long long int
 		FFTx, FFTy, FFTz;
@@ -74,9 +79,9 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 	FFTz = snapTransformSize(imz);// snapTransformSize(imz + PSFz - 1);
 
 	printf("Image information:\n");
-	printf("...Image size %d x %d x %d\n  ", imx, imy, imz);
-	printf("...PSF size %d x %d x %d\n  ", PSFx, PSFy, PSFz);
-	printf("...FFT size %d x %d x %d\n  ", FFTx, FFTy, FFTz);
+	printf("...Image size %d x %d x %d\n  ", imz, imy, imx);
+	printf("...PSF size %d x %d x %d\n  ", PSFz, PSFy, PSFx);
+	printf("...FFT size %d x %d x %d\n  ", FFTz, FFTy, FFTx);
 	printf("...Output Image size %d x %d x %d \n   ", imSize[0], imSize[1], imSize[2]);
 
 	// total pixel count for each images
@@ -154,25 +159,22 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 
 		// *** PSF Preparation
 		// OTF 
-		changestorageordercpu(h_StackA, h_psf, PSFx, PSFy, PSFz, 1);
-		genOTFcpu((fftwf_complex *)h_PSFSpectrum, h_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
+		genOTFcpu((fftwf_complex *)h_PSFSpectrum, h_psf, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		// OTF_bp
 		if (flagUnmatch) {
-			changestorageordercpu(h_StackA, h_psf_bp, PSFx, PSFy, PSFz, 1);
-			genOTFcpu((fftwf_complex *)h_FlippedPSFSpectrum, h_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
+			genOTFcpu((fftwf_complex *)h_FlippedPSFSpectrum, h_psf_bp, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
-			flipcpu(h_StackE, h_StackA, PSFx, PSFy, PSFz); // flip PSF
+			flipcpu(h_StackE, h_psf, PSFx, PSFy, PSFz); // flip PSF
 			genOTFcpu((fftwf_complex *)h_FlippedPSFSpectrum, h_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 
 		// *** image  Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			changestorageordercpu(h_StackE, h_img, imx, imy, imz, 1);
-			padstackcpu(h_StackA, h_StackE, FFTx, FFTy, FFTz, imx, imy, imz);
+			padstackcpu(h_StackA, h_img, FFTx, FFTy, FFTz, imx, imy, imz);
 		}
 		else {
-			changestorageordercpu(h_StackA, h_img, imx, imy, imz, 1);
+			memcpy(h_StackA, h_img, totalSize * sizeof(float));
 		}
 
 		// *** deconvolution ****
@@ -180,11 +182,10 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		decon_singleview_OTF0(h_StackE, h_StackA, (fftwf_complex *)h_PSFSpectrum,
 			(fftwf_complex *)h_FlippedPSFSpectrum, FFTx, FFTy, FFTz, itNumForDecon, flagConstInitial);
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cropcpu(h_StackA, h_StackE, imx, imy, imz, FFTx, FFTy, FFTz);
-			changestorageordercpu(h_decon, h_StackA, imx, imy, imz, -1);
+			cropcpu(h_decon, h_StackE, imx, imy, imz, FFTx, FFTy, FFTz);
 		}
 		else {
-			changestorageordercpu(h_decon, h_StackE, imx, imy, imz, -1);
+			memcpy(h_decon, h_StackE, totalSize * sizeof(float));
 		}
 		//printf("...Deconvolution completed ! ! !\n")
 
@@ -209,13 +210,11 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		deconRecords[2] = (float)freeMem / 1048576.0f;
 		// *** PSF Preparation
 		// OTF 
-		cudaMemcpy(d_StackE, h_psf, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+		cudaMemcpy(d_StackA, h_psf, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 		genOTFgpu(d_PSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		// OTF_bp
 		if (flagUnmatch){
-			cudaMemcpy(d_StackE, h_psf_bp, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+			cudaMemcpy(d_StackA, h_psf_bp, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 			genOTFgpu(d_FlippedPSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
@@ -224,13 +223,11 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		}
 		// *** image Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cudaMemcpy(d_StackA, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, 1); //1: change tiff storage order to C storage order
+			cudaMemcpy(d_StackE, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 			padstackgpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz);//
 		}
 		else {
-			cudaMemcpy(d_StackE, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, 1); //1: change tiff storage order to C storage order
+			cudaMemcpy(d_StackA, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 		}
 		// *** deconvolution ****
 		cudaMemset(d_StackE, 0, totalSizeFFT * sizeof(float));
@@ -239,12 +236,10 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		// transfer data back to CPU RAM
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
 			cropgpu(d_StackA, d_StackE, imx, imy, imz, FFTx, FFTy, FFTz);//
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
-			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		else {
-			changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
-			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		//printf("...Deconvolution completed ! ! !\n")
 
@@ -271,15 +266,13 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 
 		// *** PSF Preparation
 		// OTF 
-		cudaMemcpy(d_StackE, h_psf, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+		cudaMemcpy(d_StackA, h_psf, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 		d_PSFSpectrum = (fComplex *)d_StackE;
 		genOTFgpu(d_PSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		cudaMemcpy(h_PSFSpectrum, d_PSFSpectrum, totalSizeSpectrum * sizeof(fComplex), cudaMemcpyDeviceToHost);
 		// OTF_bp
 		if (flagUnmatch) {
-			cudaMemcpy(d_StackE, h_psf_bp, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+			cudaMemcpy(d_StackA, h_psf_bp, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 			d_FlippedPSFSpectrum = (fComplex *)d_StackE;
 			genOTFgpu(d_FlippedPSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
@@ -292,13 +285,11 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 
 		// *** image Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cudaMemcpy(d_StackA, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, 1); //1: change tiff storage order to C storage order
+			cudaMemcpy(d_StackE, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 			padstackgpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz);//
 		}
 		else {
-			cudaMemcpy(d_StackE, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, 1); //1: change tiff storage order to C storage order
+			cudaMemcpy(d_StackA, h_img, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 		}
 		// *** deconvolution ****
 		cudaMemset(d_StackE, 0, totalSizeFFT * sizeof(float));
@@ -307,12 +298,10 @@ int decon_singleview(float *h_decon, float *h_img, unsigned int *imSize, float *
 		// transfer data back to CPU RAM
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
 			cropgpu(d_StackA, d_StackE, imx, imy, imz, FFTx, FFTy, FFTz);//
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
-			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		else {
-			changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
-			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		//printf("...Deconvolution completed ! ! !\n")
 
@@ -348,14 +337,19 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 	//[0]:  the actual GPU memory mode used;
 	//[1] -[5]: initial GPU memory, after variables partially allocated, during processing, after processing, after variables released ( all in MB);
 	//[6] -[9]: initializing time, prepocessing time, decon time, total time;	
-	// image size
+
+	// *************** switch x and z size *****************
+	// **** due to the different data storage way of C and FFT library
+	// **** Previously operation on images by functions changestorageordercpu and changestorageordergpu
+
+	// image size: 
 	long long int
 		imx, imy, imz;
-	imx = imSize[0], imy = imSize[1], imz = imSize[2];
+	imz = imSize[0], imy = imSize[1], imx = imSize[2];
 	// PSF size
 	long long int
 		PSFx, PSFy, PSFz;
-	PSFx = psfSize[0], PSFy = psfSize[1], PSFz = psfSize[2];
+	PSFz = psfSize[0], PSFy = psfSize[1], PSFx = psfSize[2];
 	// FFT size
 	long long int
 		FFTx, FFTy, FFTz;
@@ -366,9 +360,9 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 
 	if (verbose) {
 		printf("\tImage information:\n");
-		printf("\t... Image size %d x %d x %d\n  ", imx, imy, imz);
-		printf("\t... PSF size %d x %d x %d\n  ", PSFx, PSFy, PSFz);
-		printf("\t... FFT size %d x %d x %d\n  ", FFTx, FFTy, FFTz);
+		printf("\t... Image size %d x %d x %d\n  ", imz, imy, imx);
+		printf("\t... PSF size %d x %d x %d\n  ", PSFz, PSFy, PSFx);
+		printf("\t... FFT size %d x %d x %d\n  ", FFTz, FFTy, FFTx);
 		printf("\t... Output Image size %d x %d x %d \n   ", imSize[0], imSize[1], imSize[2]);
 	}
 	
@@ -458,57 +452,50 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 
 		// *** PSF A Preparation
 		// OTF 
-		changestorageordercpu(h_StackA, h_psf1, PSFx, PSFy, PSFz, 1);
-		genOTFcpu((fftwf_complex *)h_PSFASpectrum, h_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
+		genOTFcpu((fftwf_complex *)h_PSFASpectrum, h_psf1, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		// OTF_bp
 		if (flagUnmatch) {
-			changestorageordercpu(h_StackA, h_psf_bp1, PSFx, PSFy, PSFz, 1);
-			genOTFcpu((fftwf_complex *)h_FlippedPSFASpectrum, h_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
+			genOTFcpu((fftwf_complex *)h_FlippedPSFASpectrum, h_psf_bp1, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
-			flipcpu(h_StackE, h_StackA, PSFx, PSFy, PSFz); // flip PSF
+			flipcpu(h_StackE, h_psf1, PSFx, PSFy, PSFz); // flip PSF
 			genOTFcpu((fftwf_complex *)h_FlippedPSFASpectrum, h_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 
 		// *** PSF B Preparation
 		// OTF 
-		changestorageordercpu(h_StackA, h_psf2, PSFx, PSFy, PSFz, 1);
-		genOTFcpu((fftwf_complex *)h_PSFBSpectrum, h_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
+		genOTFcpu((fftwf_complex *)h_PSFBSpectrum, h_psf2, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		// OTF_bp
 		if (flagUnmatch) {
-			changestorageordercpu(h_StackA, h_psf_bp2, PSFx, PSFy, PSFz, 1);
-			genOTFcpu((fftwf_complex *)h_FlippedPSFBSpectrum, h_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
+			genOTFcpu((fftwf_complex *)h_FlippedPSFBSpectrum, h_psf_bp2, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
-			flipcpu(h_StackE, h_StackA, PSFx, PSFy, PSFz); // flip PSF
+			flipcpu(h_StackE, h_psf2, PSFx, PSFy, PSFz); // flip PSF
 			genOTFcpu((fftwf_complex *)h_FlippedPSFBSpectrum, h_StackE, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		// *** image A Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			changestorageordercpu(h_StackE, h_img1, imx, imy, imz, 1);
-			padstackcpu(h_StackA, h_StackE, FFTx, FFTy, FFTz, imx, imy, imz);
+			padstackcpu(h_StackA, h_img1, FFTx, FFTy, FFTz, imx, imy, imz);
 		}
 		else {
-			changestorageordercpu(h_StackA, h_img1, imx, imy, imz, 1);
+			memcpy(h_StackA, h_img1, totalSize * sizeof(float));
 		}
 		// *** image B Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			changestorageordercpu(h_StackE, h_img2, imx, imy, imz, 1);
-			padstackcpu(h_StackB, h_StackE, FFTx, FFTy, FFTz, imx, imy, imz);
+			padstackcpu(h_StackB, h_img2, FFTx, FFTy, FFTz, imx, imy, imz);
 		}
 		else {
-			changestorageordercpu(h_StackB, h_img2, imx, imy, imz, 1);
+			memcpy(h_StackB, h_img2, totalSize * sizeof(float));
 		}
 		// *** deconvolution ****
 		memset(h_StackE, 0, totalSizeFFT * sizeof(float));
 		decon_dualview_OTF0(h_StackE, h_StackA, h_StackB, (fftwf_complex *)h_PSFASpectrum, (fftwf_complex *)h_PSFBSpectrum,
 			(fftwf_complex *)h_FlippedPSFASpectrum, (fftwf_complex *)h_FlippedPSFBSpectrum, FFTx, FFTy, FFTz, itNumForDecon, flagConstInitial);
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cropcpu(h_StackA, h_StackE, imx, imy, imz, FFTx, FFTy, FFTz);
-			changestorageordercpu(h_decon, h_StackA, imx, imy, imz, -1);
+			cropcpu(h_decon, h_StackE, imx, imy, imz, FFTx, FFTy, FFTz);
 		}
 		else {
-			changestorageordercpu(h_decon, h_StackE, imx, imy, imz, -1);
+			memcpy(h_decon, h_StackE, totalSize * sizeof(float));
 		}
 		//printf("...Deconvolution completed ! ! !\n")
 
@@ -534,13 +521,11 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 		deconRecords[2] = (float)freeMem / 1048576.0f;
 		// *** PSF A Preparation
 		// OTF 
-		cudaMemcpy(d_StackE, h_psf1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); 
+		cudaMemcpy(d_StackA, h_psf1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 		genOTFgpu(d_PSFASpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		// OTF_bp
 		if (flagUnmatch) {
-			cudaMemcpy(d_StackE, h_psf_bp1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); 
+			cudaMemcpy(d_StackA, h_psf_bp1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 			genOTFgpu(d_FlippedPSFASpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
@@ -549,13 +534,11 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 		}
 		// *** PSF B Preparation
 		// OTF 
-		cudaMemcpy(d_StackE, h_psf2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); 
+		cudaMemcpy(d_StackA, h_psf2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 		genOTFgpu(d_PSFBSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		// OTF_bp
 		if (flagUnmatch) {
-			cudaMemcpy(d_StackE, h_psf_bp2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); 
+			cudaMemcpy(d_StackA, h_psf_bp2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 			genOTFgpu(d_FlippedPSFBSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
@@ -566,23 +549,19 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 		cudaMalloc((void **)&d_StackB, totalSizeMax * sizeof(float));
 		// *** image A Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cudaMemcpy(d_StackA, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, 1); 
+			cudaMemcpy(d_StackE, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 			padstackgpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz);
 		}
 		else {
-			cudaMemcpy(d_StackE, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, 1);
+			cudaMemcpy(d_StackA, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 		}
 		// *** image B Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cudaMemcpy(d_StackB, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackE, d_StackB, imx, imy, imz, 1); 
+			cudaMemcpy(d_StackE, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 			padstackgpu(d_StackB, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz);
 		}
 		else {
-			cudaMemcpy(d_StackE, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackB, d_StackE, FFTx, FFTy, FFTz, 1);
+			cudaMemcpy(d_StackB, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 		}
 		cudaCheckErrors("****Image preparation failed !!!!*****");
 		// *** deconvolution ****
@@ -592,12 +571,10 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 		// transfer data back to CPU RAM
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
 			cropgpu(d_StackA, d_StackE, imx, imy, imz, FFTx, FFTy, FFTz);
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, -1); 
-			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		else {
-			changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, -1); 
-			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		//printf("...Deconvolution completed ! ! !\n")
 
@@ -627,15 +604,13 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 
 		// *** PSF A Preparation
 		// OTF 
-		cudaMemcpy(d_StackE, h_psf1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); //1: change tiff storage order to C storage order
+		cudaMemcpy(d_StackA, h_psf1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 		d_PSFSpectrum = (fComplex *)d_StackE;
 		genOTFgpu(d_PSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		cudaMemcpy(h_PSFASpectrum, d_PSFSpectrum, totalSizeSpectrum * sizeof(fComplex), cudaMemcpyDeviceToHost);
 		// OTF_bp
 		if (flagUnmatch) {
-			cudaMemcpy(d_StackE, h_psf_bp1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); 
+			cudaMemcpy(d_StackA, h_psf_bp1, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 			genOTFgpu(d_PSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
@@ -647,15 +622,13 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 
 		// *** PSF B Preparation
 		// OTF 
-		cudaMemcpy(d_StackE, h_psf2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-		changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); 
+		cudaMemcpy(d_StackA, h_psf2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 		d_PSFSpectrum = (fComplex *)d_StackE;
 		genOTFgpu(d_PSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		cudaMemcpy(h_PSFBSpectrum, d_PSFSpectrum, totalSizeSpectrum * sizeof(fComplex), cudaMemcpyDeviceToHost);
 		// OTF_bp
 		if (flagUnmatch) {
-			cudaMemcpy(d_StackE, h_psf_bp2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, PSFx, PSFy, PSFz, 1); 
+			cudaMemcpy(d_StackA, h_psf_bp2, totalSizePSF * sizeof(float), cudaMemcpyHostToDevice);
 			genOTFgpu(d_PSFSpectrum, d_StackA, FFTx, FFTy, FFTz, PSFx, PSFy, PSFz, true);
 		}
 		else { // traditional backprojector matched PSF 
@@ -668,24 +641,20 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 
 		// *** image B Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cudaMemcpy(d_StackA, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, 1); 
+			cudaMemcpy(d_StackE, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 			padstackgpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz);//
 		}
 		else {
-			cudaMemcpy(d_StackE, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, 1); 
+			cudaMemcpy(d_StackA, h_img2, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 		}
 		cudaMemcpy(h_StackB, d_StackA, totalSizeFFT * sizeof(float), cudaMemcpyDeviceToHost);
 		// *** image A Preparation
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
-			cudaMemcpy(d_StackA, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, 1); 
+			cudaMemcpy(d_StackE, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 			padstackgpu(d_StackA, d_StackE, FFTx, FFTy, FFTz, imx, imy, imz);//
 		}
 		else {
-			cudaMemcpy(d_StackE, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
-			changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, 1); 
+			cudaMemcpy(d_StackA, h_img1, totalSize * sizeof(float), cudaMemcpyHostToDevice);
 		}
 		cudaCheckErrors("****Image preparation failed !!!!*****");
 		
@@ -697,12 +666,10 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 		// transfer data back to CPU RAM
 		if ((imx < FFTx) || (imy < FFTy) || (imz < FFTz)) {
 			cropgpu(d_StackA, d_StackE, imx, imy, imz, FFTx, FFTy, FFTz);//
-			changestorageordergpu(d_StackE, d_StackA, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
-			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		else {
-			changestorageordergpu(d_StackA, d_StackE, imx, imy, imz, -1); //-1: change C storage order to tiff storage order
-			cudaMemcpy(h_decon, d_StackA, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_decon, d_StackE, totalSize * sizeof(float), cudaMemcpyDeviceToHost);
 		}
 		//printf("...Deconvolution completed ! ! !\n")
 
