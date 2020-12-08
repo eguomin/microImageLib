@@ -19,4 +19,4 @@ fileiTmx="balabala"
 # run app with parameters: 
 ./bin/linux/spimFusionBatch $pathOut $pathSPIMA $pathSPIMB $nameA $nameB 0 2 1 0 \
 0.1625 0.1625 1.0 0.1625 0.1625 1.0 2 -1 0 $fileiTmx 0.0001 3000 1 1 \
-$filePSFA $filePSFA 10 0 0 1 0 1 16 1 0
+$filePSFA $filePSFB 10 0 0 1 0 1 16 1 0
