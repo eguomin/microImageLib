@@ -390,6 +390,9 @@ int main(int argc, char* argv[])
 		break;
 	default:
 		opChoice = 0; // no rotation
+		sx2 = imSize2[0] = tempSize[0];
+		sy2 = imSize2[1] = tempSize[1];
+		sz2 = imSize2[2] = tempSize[2];
 	}
 	// image data size
 	long long int totalSize = sx * sy * sz; // output size
