@@ -83,4 +83,4 @@ Please cite our paper [[1]](#1) if you use the code provided in this repository.
 
 <a id="1">[1]</a>
 Min Guo, *et al*.
-"[Rapid image deconvolution and multiview fusion for optical microscopy](https://doi.org/10.1038/s41587-020-0560-x)." Nature Biotechnology (2020): 1-10.
+"[Rapid image deconvolution and multiview fusion for optical microscopy](https://doi.org/10.1038/s41587-020-0560-x)." Nature Biotechnology 38.11 (2020): 1337-1346.
