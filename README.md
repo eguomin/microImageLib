@@ -1,4 +1,7 @@
-# microImageLib
+microImageLib
+=============
+
+## Overview
 A collection of 3D image processing functions and applications with GPU implementation, originally developped for fast 3D microscopic image processing [[1]](#1).
 - libapi: a dynamic-link library including TIFF reading/writing, affine transformation, 2D/3D maximum intensity projections (MIP), registration, deconvolution etc. 
 - checkGPUDevice: inqury GPU devices and CUDA version on the PC.
@@ -50,7 +53,7 @@ make -clean
 (or) make -cleanAll
 ```
 
-The compiled binaries (for both Windows 10 and Ubuntu 18.04 LTS) along with the library dependencies are included [here](https://www.dropbox.com/sh/b3t8l6evdaqkixr/AAB0QXAa-pCgDDtryTbWlPDIa?dl=0), for users who want to use the compiled versions.
+The compiled binaries (for both Windows 10 and Ubuntu 18.04 LTS) along with the library dependencies are included [here](https://www.dropbox.com/sh/czn4kwzwcgy0s3x/AADipfEsUSwuCsEBg8P7wc4_a?dl=0), for users who want to use the compiled versions.
 
 ## Usage
 Users can use command with option `-h` or `-help` to find the introduction and manual for each application, e.g.
@@ -58,24 +61,26 @@ Users can use command with option `-h` or `-help` to find the introduction and m
 spimFusion -h
 ```
 
-Users can also download [a test dataset with a few example scripts](https://www.dropbox.com/sh/b3t8l6evdaqkixr/AAB0QXAa-pCgDDtryTbWlPDIa?dl=0). The example scripts are a group of *cmd* or *shell* commands that invoke the binary applications with configurations for the test dataset. To run the scripts, users need to open the command terminal and get to the directory of the scripts, i.e., the folder `./cudaLib`.
+Users can also download [a test dataset with a few example scripts](https://www.dropbox.com/sh/czn4kwzwcgy0s3x/AADipfEsUSwuCsEBg8P7wc4_a?dl=0). The example scripts are a group of *cmd* or *shell* commands that invoke the binary applications with configurations for the test dataset. To run the scripts, users need to open the command terminal and get to the directory of the scripts, i.e., the folder `./cudaLib`.
 
 1) For Windows PC, run any of the `cmd_xx.bat` scripts, e.g.
-```posh
-cmd_spimFusionBatch.bat
-```
+    ```posh
+    cmd_spimFusionBatch.bat
+    ```
 2) For Linux PC, run any of the `sh_xx.sh` scripts, e.g.
-```posh
-sh sh_spimFusionBatch.sh
-```
-In case the Linux PC does not have the CUDA or FFTW installed, users will need add the dependencies directory to the path variable *LD_LIBRARY_PATH* so as to use the libraries provided with the compiled package, e.g., use command:
-```posh
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./bin/linux
-sh sh_spimFusionBatch.sh
-```
+    ```posh
+    sh sh_spimFusionBatch.sh
+    ```
+    In case the Linux PC does not have the CUDA or FFTW installed, users will need to add the dependencies directory to the path variable *LD_LIBRARY_PATH* so as to use the libraries provided within the compiled package, e.g., use command:
+    ```posh
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./bin/linux
+    sh sh_spimFusionBatch.sh
+    ```
+    
+Please cite our paper [[1]](#1) if you use the code provided in this repository.
 
 ## Reference
 
 <a id="1">[1]</a>
-Min Guo *et al.* (2020).
-"Rapid image deconvolution and multiview fusion for optical microscopy." Nature Biotechnology (2020): 1-10. https://doi.org/10.1038/s41587-020-0560-x
+Min Guo, *et al*.
+"[Rapid image deconvolution and multiview fusion for optical microscopy](https://doi.org/10.1038/s41587-020-0560-x)." Nature Biotechnology (2020): 1-10.
