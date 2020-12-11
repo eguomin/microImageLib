@@ -1,1 +1,0 @@
-.\bin\win\reg3D.exe -t .\data\SPIMA\SPIMA_0.tif -s .\data\SPIMB\SPIMB_0.tif -o .\data\results\SPIMB_reg_0.tif -regc 2  -affm 6 -verbON  -it 3000 -gm 1 -ftol 0.0001 -otmx .\data\results\SPIMB_reg_0.tmx
