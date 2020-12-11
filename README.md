@@ -2,9 +2,9 @@ microImageLib
 =============
 
 ## Overview
-A collection of 3D image processing functions and applications with GPU implementation, originally developped for fast 3D microscopic image processing [[1]](#1).
+A collection of 3D image processing functions and applications with GPU implementation, originally developed for fast 3D microscopic image processing [[1]](#1).
 - libapi: a dynamic-link library including TIFF reading/writing, affine transformation, 2D/3D maximum intensity projections (MIP), registration, deconvolution etc. 
-- checkGPUDevice: inqury GPU devices and CUDA version on the PC.
+- checkGPUDevice: query GPU devices and CUDA version on the PC.
 - reg3D: 3D registration based on affine transformation.
 - deconSingleView: 3D single-view deconvolution.
 - deconDualView: 3D dual-view joint deconvolution.

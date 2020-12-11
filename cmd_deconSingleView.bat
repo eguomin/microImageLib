@@ -1,0 +1,1 @@
+.\bin\win\deconSingleView -i .\data\SPIMA\SPIMA_0.tif -fp .\data\PSFA.tif -o .\data\results\SPIMA_0_decon.tif -it 20 -dev 0 -verbON  -cON
