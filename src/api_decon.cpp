@@ -587,7 +587,7 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 		cudaFree(d_PSFASpectrum); cudaFree(d_PSFBSpectrum); 
 		cudaFree(d_FlippedPSFASpectrum); cudaFree(d_FlippedPSFBSpectrum); 
 		break;
-	case 2:
+	case 2: // GPU memory optimized. 
 		time1 = clock();
 		h_StackB = (float *)malloc(totalSizeMax * sizeof(float));
 		h_PSFASpectrum = (fComplex *)malloc(totalSizeSpectrum * sizeof(fComplex));
@@ -678,7 +678,7 @@ int decon_dualview(float *h_decon, float *h_img1, float *h_img2, unsigned int *i
 		printf("\t... GPU free memory (after processing) is %.0f MBites\n", (float)freeMem / 1048576.0f);
 		deconRecords[4] = (float)freeMem / 1048576.0f;
 		// release variables
-		free(h_PSFASpectrum); free(h_PSFBSpectrum);
+		free(h_StackB); free(h_PSFASpectrum); free(h_PSFBSpectrum);
 		free(h_FlippedPSFASpectrum); free(h_FlippedPSFBSpectrum);
 		cudaFree(d_StackA); cudaFree(d_StackE);
 		break;
