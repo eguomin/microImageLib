@@ -12,10 +12,10 @@
 PROJECT_API char* concat(int count, ...);
 PROJECT_API bool fexists(const char * filename);
 PROJECT_API unsigned short gettifinfo(char tifdir[], unsigned int *tifSize);
-PROJECT_API void readtifstack(float *h_Image, char tifdir[], unsigned int *imsize);
-PROJECT_API void writetifstack(char tifdir[], float *h_Image, unsigned int *imsize, unsigned short bitPerSample);
-PROJECT_API void readtifstack_16to16(unsigned short *h_Image, char tifdir[], unsigned int *imsize);
-PROJECT_API void writetifstack_16to16(char tifdir[], unsigned short *h_Image, unsigned int *imsize);
+PROJECT_API void readtifstack(float *h_Image, char *tifdir, unsigned int *imsize);
+PROJECT_API void writetifstack(char *tifdir, float *h_Image, unsigned int *imsize, unsigned short bitPerSample);
+PROJECT_API void readtifstack_16to16(unsigned short *h_Image, char *tifdir, unsigned int *imsize);
+PROJECT_API void writetifstack_16to16(char *tifdir, unsigned short *h_Image, unsigned int *imsize);
 
 // Query GPU device
 PROJECT_API void queryDevice();

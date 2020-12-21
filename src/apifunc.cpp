@@ -80,7 +80,7 @@ char* concat(int count, ...)
 }
 
 //check file exists or not
-bool fexists(const char * filename){
+bool fexists(const char *filename){
 	if (FILE * file = fopen(filename, "r")) {
 		fclose(file);
 		return true;
@@ -113,7 +113,7 @@ int findSubFolders(char *subFolderNames, char *pathIn)
 
 #endif
 
-unsigned short gettifinfo(char tifdir[], unsigned int *tifSize){
+unsigned short gettifinfo(char *tifdir, unsigned int *tifSize){
 	if (!fexists(tifdir)) {
 		fprintf(stderr, "*** File does not exist: %s\n", tifdir);
 		exit(1);
@@ -137,7 +137,7 @@ unsigned short gettifinfo(char tifdir[], unsigned int *tifSize){
 
 // Read and write tiff image
 
-void readtifstack(float *h_Image, char tifdir[], unsigned int *imsize){
+void readtifstack(float *h_Image, char *tifdir, unsigned int *imsize){
 	// check if file exists
 	if (!fexists(tifdir)) {
 		fprintf(stderr, "*** Failed to read image!!! File does not exist: %s\n", tifdir);
@@ -195,7 +195,7 @@ void readtifstack(float *h_Image, char tifdir[], unsigned int *imsize){
 	}
 }
 
-void readtifstack_16to16(unsigned short *h_Image, char tifdir[], unsigned int *imsize){
+void readtifstack_16to16(unsigned short *h_Image, char *tifdir, unsigned int *imsize){
 	// check if file exists
 	if (!fexists(tifdir)) {
 		fprintf(stderr, "*** Failed to read image!!! File does not exist: %s\n", tifdir);
@@ -239,7 +239,7 @@ void readtifstack_16to16(unsigned short *h_Image, char tifdir[], unsigned int *i
 }
 
 // Write tiff image
-void writetifstack(char tifdir[], float *h_Image, unsigned int *imsize, unsigned short bitPerSample) {
+void writetifstack(char *tifdir, float *h_Image, unsigned int *imsize, unsigned short bitPerSample) {
 	int imTotalSize = imsize[0] * imsize[1] * imsize[2];
 	uint32 imxy = imsize[0] * imsize[1];
 	uint32 nByte = (uint32)(bitPerSample / 8);
@@ -299,7 +299,7 @@ void writetifstack(char tifdir[], float *h_Image, unsigned int *imsize, unsigned
 }
 
 
-void writetifstack_16to16(char tifdir[], unsigned short *h_Image, unsigned int *imsize) {
+void writetifstack_16to16(char *tifdir, unsigned short *h_Image, unsigned int *imsize) {
 	int imTotalSize = imsize[0] * imsize[1] * imsize[2];
 	uint32 imxy = imsize[0] * imsize[1];
 	uint32 nByte = (uint32)(16 / 8);
