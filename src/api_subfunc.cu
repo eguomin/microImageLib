@@ -1576,8 +1576,10 @@ void cropcpu(T *h_odata, T *h_idata, long long int sx, long long int sy, long lo
 		for (long long int y = 0; y < sy; y++) {
 			for (long long int z = 0; z < sz; z++) {
 				dx = sox + x; dy = soy + y; dz = soz + z;
-				//d_odata[z*sy*sx + y*sx + x] = d_idata[dz*sy2*sx2 + dy*sx2 + dx];
-				h_odata[x*sy*sz + y*sz + z] = h_idata[dx*sy2*sz2 + dy*sz2 + dz];
+				if (dx < sx2 && dy < sy2 && dz < sz2) {
+					//d_odata[z*sy*sx + y*sx + x] = d_idata[dz*sy2*sx2 + dy*sx2 + dx];
+					h_odata[x*sy*sz + y * sz + z] = h_idata[dx*sy2*sz2 + dy * sz2 + dz];
+				}
 			}
 		}
 	}

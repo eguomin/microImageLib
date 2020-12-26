@@ -539,11 +539,14 @@ __global__ void corrkernel(float *d_t, double *d_temp1, double *d_temp2, long lo
 			float tx = d_aff[0] * ix + d_aff[1] * iy + d_aff[2] * iz + d_aff[3] + 0.5;
 			float ty = d_aff[4] * ix + d_aff[5] * iy + d_aff[6] * iz + d_aff[7] + 0.5;
 			float tz = d_aff[8] * ix + d_aff[9] * iy + d_aff[10] * iz + d_aff[11] + 0.5;
+			// * * * padding with boundary values
+			// s = tex3D(tex, tx, ty, tz); // source image in texture: d_s[i][j][k] = tex3D[i][j][k]
+			// * * * padding with zeros
 			if (tx>0 && tx < sx2 && ty>0 && ty < sy2 && tz>0 && tz < sz2)
-				s = tex3D(tex, tx, ty, tz); // d_Stack[i][j][k] = tex3D[i][j][k], Target image in texture
+				s = tex3D(tex, tx, ty, tz); // source image in texture: d_s[i][j][k] = tex3D[i][j][k]
 			else
-				s = 0.0001;
-			t = d_t[x + y*sx + z*sx*sy];
+				s = 0;
+			t = d_t[x + y*sx + z*sx*sy]; // target image
 			ss += (double)s*s;
 			st += (double)s*t;
 		}
@@ -742,8 +745,10 @@ __global__ void cropgpukernel(T *d_odata, T *d_idata, long long int sx, long lon
 	if (x < sx && y < sy && z < sz){
 		long long int dx, dy, dz;
 		dx = sox + x; dy = soy + y; dz = soz + z;
-		//d_odata[z*sy*sx + y*sx + x] = d_idata[dz*sy2*sx2 + dy*sx2 + dx];
-		d_odata[x*sy*sz + y*sz + z] = d_idata[dx*sy2*sz2 + dy*sz2 + dz];
+		if (dx < sx2 && dy < sy2 && dz < sz2) {
+			//d_odata[z*sy*sx + y*sx + x] = d_idata[dz*sy2*sx2 + dy*sx2 + dx];
+			d_odata[x*sy*sz + y * sz + z] = d_idata[dx*sy2*sz2 + dy * sz2 + dz];
+		}
 	}
 }
 template <class T>
