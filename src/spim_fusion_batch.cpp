@@ -441,7 +441,7 @@ int main(int argc, char* argv[])
 	case 1:
 		printf("...Initial transformation matrix: based on input matrix\n"); break;
 	case 2:
-		printf("...Initial transformation matrix: by phase translation\n"); break;
+		printf("...Initial transformation matrix: by 3D phase translation\n"); break;
 	case 3:
 		printf("...Initial transformation matrix: by 2D registration\n"); break;
 	default:
@@ -508,7 +508,7 @@ int main(int argc, char* argv[])
 	case 1:
 		fprintf(f1, "...Initial transformation matrix: based on input matrix\n"); break;
 	case 2:
-		fprintf(f1, "...Initial transformation matrix: by phase translation\n"); break;
+		fprintf(f1, "...Initial transformation matrix: by 3D phase translation\n"); break;
 	case 3:
 		fprintf(f1, "...Initial transformation matrix: by 2D registration\n"); break;
 	default:
@@ -605,6 +605,7 @@ int main(int argc, char* argv[])
 	FILE *fTmxIn = NULL, *fTmxOut = NULL;
 	// ****** processing in batch *************
 	int gpuMemMode = -1;
+	int regChoiceTemp = 0;
 	bool verbose = true;
 	bool flagConstInitial = false;
 	for (imgNum = imgNumStart; imgNum <= imgNumEnd; imgNum += imgNumInterval) {
@@ -718,7 +719,11 @@ int main(int argc, char* argv[])
 					flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 				mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
 				if (!mStatus) { // repeat with different initial matrix 
-					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
+					if (regChoice == 4)
+						regChoiceTemp = 2;
+					else
+						regChoiceTemp = 4;
+					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoiceTemp, affMethod,
 						false, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 				}
 				imgNum = imgNumStart - 1; // set to start batch processing
@@ -729,13 +734,18 @@ int main(int argc, char* argv[])
 			case 2:
 				if ((imgNum != imgNumStart) || (iColor > 0)) {
 					flagiTmx = 1; // use previous matrix as input
+					regChoice = 2;
 					memcpy(iTmx, h_affWeighted, NDIM * sizeof(float));
 				}
 				(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
 					flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 				mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
 				if (!mStatus) { // repeat with different initial matrix 
-					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
+					if (regChoice == 4)
+						regChoiceTemp = 2;
+					else
+						regChoiceTemp = 4;
+					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoiceTemp, affMethod,
 						false, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 					mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
 					if (!mStatus) { // apply previous matrix
@@ -759,7 +769,11 @@ int main(int argc, char* argv[])
 					flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 				mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
 				if (!mStatus) { // repeat with different initial matrix 
-					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], 0, affMethod,
+					if (regChoice == 4)
+						regChoiceTemp = 2;
+					else
+						regChoiceTemp = 4;
+					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoiceTemp, affMethod,
 						false, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 				}
 				break;
