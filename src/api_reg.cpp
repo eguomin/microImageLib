@@ -118,8 +118,9 @@ int reg2d(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int 
 	/*
 	*** registration choice: regChoice
 	0: no phasor or affine registration; if flagTmx is true, transform h_img2 based on input matrix;
-	1: phasor registraion (pixel-level translation only);
+	1: shift image step-by-step (translation only);
 	2: affine registration (with or without input matrix);
+	3: phasor registraion (pixel-level translation only);
 	*
 	*** flagTmx: only if regChoice == 0, 2
 	true: use iTmx as input matrix;
@@ -163,8 +164,12 @@ int reg2d(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int 
 	}
 	records[0] = gpuMemMode;
 	int affMethod = 1;
-	long long int shiftXY[2];
 	float *d_imgT = NULL, *d_imgS = NULL;
+	long long int shiftXY[2];
+	float shiftXY0[2];
+	float shiftRegion; //0< shiftRegion <1
+	float totalStep;
+	float *recordsTemp=NULL;
 	switch (gpuMemMode) {
 	case 0:
 		switch (regChoice) {
@@ -191,6 +196,17 @@ int reg2d(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int 
 			}
 			break;
 		case 1:
+			shiftRegion = 0.4; //0< shiftRegion <1
+			totalStep = 40;
+			recordsTemp = (float *)malloc(9 * sizeof(float));
+			(void)reg2d_shiftalign1(h_reg, iTmx, h_img1, h_img2, imx1, imy1, imx2, imy2,
+				flagTmx, shiftRegion, totalStep, recordsTemp);
+			free(recordsTemp);
+			break;
+		case 2:
+			(void)reg2d_affine1(h_reg, iTmx, h_img1, h_img2, imx1, imy1, imx2, imy2, affMethod, flagTmx, FTOL, itLimit, records);
+			break;
+		case 3:
 			if ((imx1 != imx2) || (imy1 != imy2)) {
 				printf("\n ****Image size of the 2D images is not matched, processing stop !!! **** \n");
 				return 1;
@@ -204,9 +220,6 @@ int reg2d(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int 
 			cudaMemcpy(h_reg, d_imgT, totalSize1 * sizeof(float), cudaMemcpyDeviceToHost);
 			iTmx[0] = 1; iTmx[1] = 0; iTmx[2] = shiftXY[0];
 			iTmx[3] = 0; iTmx[4] = 1; iTmx[5] = shiftXY[1];
-			break;
-		case 2:
-			(void)reg2d_affine1(h_reg, iTmx, h_img1, h_img2, imx1, imy1, imx2, imy2, affMethod, flagTmx, FTOL, itLimit, records);
 			break;
 		default:
 			printf("\n ****Wrong registration choice is setup, no registraiton performed !!! **** \n");
@@ -361,11 +374,18 @@ int reg3d(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int 
 
 	float *h_imgT = NULL, *h_imgS = NULL;
 	float *d_imgT = NULL, *d_imgS = NULL, *d_reg = NULL;
-	long long int shiftXYZ[3], shiftXY[2], shiftZX[2];
+	long long int shiftXYZ[3];
+	// long long int shiftXY[2], shiftZX[2];
 	float *d_imgTemp1 = NULL, *d_imgTemp2 = NULL;
 	float *d_imgTemp3 = NULL, *d_imgTemp4 = NULL;
 	unsigned int im2DSize[2];
 	long long int totalSize2DMax;
+	float shiftZ, shiftXY[2];
+	float shiftRegion;
+	float totalStep;
+	float *tmx1 = NULL, *tmx2 = NULL;
+	float *recordsTemp = NULL;
+	float *h_imgTemp3 = NULL, *h_imgTemp4 = NULL;
 	switch (gpuMemMode) {
 	case 0: // CPU calculation
 		printf("\n ****CPU registraion function is under developing **** \n");
@@ -426,6 +446,7 @@ int reg3d(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int 
 			break;
 		case 4:
 			printf("\t... 2D MIP registration ... \n");
+			/* 
 			totalSize2DMax = ((imx1 * imy1) > (imz1 * imx1)) ? (imx1 * imy1) : (imz1 * imx1);
 			cudaMalloc((void **)&d_imgTemp3, totalSize2DMax * sizeof(float));
 			cudaMalloc((void **)&d_imgTemp4, totalSize2DMax * sizeof(float));
@@ -441,7 +462,46 @@ int reg3d(float *h_reg, float *iTmx, float *h_img1, float *h_img2, unsigned int 
 			iTmx[7] = shiftXY[1];
 			iTmx[11] = shiftZX[0];
 			cudaFree(d_imgTemp3); cudaFree(d_imgTemp4);
+			*/
+
+			shiftRegion = 0.3; //0< shiftRegion <1
+			totalStep = 30;
+			tmx1 = (float *)malloc(6 * sizeof(float));
+			tmx2 = (float *)malloc(6 * sizeof(float));
+			recordsTemp = (float *)malloc(9 * sizeof(float));
+			totalSize2DMax = ((imx1 * imy1) > (imz1 * imx1)) ? (imx1 * imy1) : (imz1 * imx1);
+			h_imgTemp3 = (float *)malloc(totalSize2DMax * sizeof(float));
+			h_imgTemp4 = (float *)malloc(totalSize2DMax * sizeof(float));
+			cudaMalloc((void **)&d_imgTemp3, totalSize2DMax * sizeof(float));
+
+			maxprojection(d_imgTemp3, d_imgT, imx1, imy1, imz1, 1);
+			cudaMemcpy(h_imgTemp3, d_imgTemp3, imx1 * imy1 * sizeof(float), cudaMemcpyDeviceToHost);
+			maxprojection(d_imgTemp3, d_imgS, imx1, imy1, imz1, 1);
+			cudaMemcpy(h_imgTemp4, d_imgTemp3, imx1 * imy1 * sizeof(float), cudaMemcpyDeviceToHost);
+			tmx1[0] = 1; tmx1[1] = 0; tmx1[2] = 0;
+			tmx1[3] = 0; tmx1[4] = 1; tmx1[5] = 0;
+			(void)reg2d_shiftalign1(h_reg, tmx1, h_imgTemp3, h_imgTemp4, imx1, imy1, imx1, imy1,
+				0, shiftRegion, totalStep, recordsTemp);
+
+			maxprojection(d_imgTemp3, d_imgT, imx1, imy1, imz1, 2);
+			cudaMemcpy(h_imgTemp3, d_imgTemp3, imx1 * imz1 * sizeof(float), cudaMemcpyDeviceToHost);
+			maxprojection(d_imgTemp3, d_imgS, imx1, imy1, imz1, 2);
+			cudaMemcpy(h_imgTemp4, d_imgTemp3, imx1 * imz1 * sizeof(float), cudaMemcpyDeviceToHost);
+			tmx2[0] = 1; tmx2[1] = 0; tmx2[2] = 0;
+			tmx2[3] = 0; tmx2[4] = 1; tmx2[5] = tmx1[2];
+			(void)reg2d_shiftalignX1(h_reg, tmx2, h_imgTemp3, h_imgTemp4, imz1, imx1, imz1, imx1,
+				1, shiftRegion, totalStep, recordsTemp);
+
+			for (int j = 0; j < NDIM; j++) iTmx[j] = 0;
+			iTmx[0] = iTmx[5] = iTmx[10] = 1;
+			iTmx[3] = tmx1[2];
+			iTmx[7] = tmx1[5];
+			iTmx[11] = tmx2[2];
+			cudaFree(d_imgTemp3);
+			free(tmx1); free(tmx2); free(recordsTemp); free(h_imgTemp3); free(h_imgTemp4);
+			printf("\t... shift translation, X: %2.1f; Y: %2.1f; Z: %2.1f\n", tmx1[2], tmx1[5], tmx2[2]);
 			printf("\t... 2D MIP registration completed. \n");
+
 			printf("\t... 3D registration ... \n");
 			cudaMalloc((void **)&d_reg, totalSize1 * sizeof(float));
 			flagTmx = true;

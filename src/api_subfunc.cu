@@ -1851,6 +1851,276 @@ int affinetrans2d1(float *h_odata, float *iTmx, float *h_idata, long long int sx
 }
 
 extern "C"
+int reg2d_shiftalign0(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords) {
+	return 0;
+}
+
+extern "C"
+int reg2d_shiftalign1(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords) {
+	//regRecords: 9-element array 
+	//[0] -[3]: initial GPU memory, after variables allocated, after processing, after variables released ( all in MB)
+	//[4] -[5]: initial cost function value, minimized cost function value
+	//[6] -[8]: registration time (in s), whole time (in s), total sub iterations
+	imx2D1 = sx; imy2D1 = sy;
+	imx2D2 = sx2; imy2D2 = sy2;
+
+	// total pixel count for each images
+	long long int totalSize1 = imx2D1 * imy2D1;
+	long long int totalSize2 = imx2D2 * imy2D2;
+	long long int totalSizeMax = (totalSize1 > totalSize2) ? totalSize1 : totalSize2;
+
+	//****************** Processing Starts*****************//
+	// variables for memory and time cost records
+	clock_t start, startWhole, end, endWhole;
+	size_t totalMem = 0;
+	size_t freeMem = 0;
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[0] = (float)freeMem / 1048576.0f;
+
+	startWhole = clock();
+	float fret;
+	int DIM2D = 6;
+	h_aff2D = (float *)malloc(DIM2D * sizeof(float));
+	static float *p2D = (float *)malloc((DIM2D + 1) * sizeof(float));
+	float **xi2D;
+	xi2D = matrix(1, DIM2D, 1, DIM2D);
+
+	float shiftX, shiftY, offSetX, offSetY;
+	float costValue2D, costValue2DXYmax;
+	//float totalStep = 40;
+	//float shiftRegion = 0.6; //0< shiftRegion <1
+	float stepSizex, stepSizey;
+
+
+	float *h_imgT = (float *)malloc(totalSizeMax * sizeof(float));
+	cudaMalloc((void **)&d_img2D, totalSize1 * sizeof(float));
+	cudaCheckErrors("****Memory allocating fails... GPU out of memory !!!!*****\n");
+
+	cudaChannelFormatDesc channelDesc2D =
+		cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+	cudaArray *d_Array2D;
+	cudaMallocArray(&d_Array2D, &channelDesc2D, imx2D2, imy2D2);
+	cudaCheckErrors("****Memory array allocating fails... GPU out of memory !!!!*****\n");
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[1] = (float)freeMem / 1048576.0f;
+
+
+	start = clock();
+	if (flagTmx) {
+		memcpy(h_aff2D, iTmx, DIM2D * sizeof(float));
+	}
+	else {
+		h_aff2D[0] = 1, h_aff2D[1] = 0, h_aff2D[2] = (imx2D2 - imx2D1) / 2;
+		h_aff2D[3] = 0, h_aff2D[4] = 1, h_aff2D[5] = (imy2D2 - imy2D1) / 2;
+	}
+	p2D[0] = 0;
+	p2D[1] = h_aff2D[0], p2D[2] = h_aff2D[1], p2D[3] = h_aff2D[2];
+	p2D[4] = h_aff2D[3], p2D[5] = h_aff2D[4], p2D[6] = h_aff2D[5];
+	for (int i = 1; i <= DIM2D; i++)
+		for (int j = 1; j <= DIM2D; j++)
+			xi2D[i][j] = (i == j ? 1.0 : 0.0);
+
+	float meanValue = (float)sumcpu(h_img1, totalSize1) / totalSize1;
+	addvaluecpu(h_imgT, h_img1, -meanValue, totalSize1);
+	multicpu(h_reg, h_imgT, h_imgT, totalSize1);
+	double sumSqrA = sumcpu(h_reg, totalSize1);
+	valueStatic2D = float(sqrt(sumSqrA));
+	if (valueStatic2D == 0) {
+		fprintf(stderr, "*** SD of image 1 is zero, empty image input **** \n");
+		exit(1);
+	}
+	cudaMemcpy(d_img2D, h_imgT, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
+
+	meanValue = (float)sumcpu(h_img2, totalSize2) / totalSize2;
+	addvaluecpu(h_imgT, h_img2, -meanValue, totalSize2);
+	cudaMemcpyToArray(d_Array2D, 0, 0, h_imgT, totalSize2 * sizeof(float), cudaMemcpyHostToDevice);
+	BindTexture2D(d_Array2D, channelDesc2D);
+	cudaCheckErrors("****Fail to bind 2D texture!!!!*****\n");
+	itNumStatic2D = 0;
+	regRecords[4] = - costfunc2D(p2D);
+
+	shiftX = 0; shiftY = 0;
+	offSetX = h_aff2D[2];  offSetY = h_aff2D[5];
+	//*** translate step by step
+	costValue2DXYmax = 0;
+	stepSizex = (float)imx2D2 * shiftRegion / totalStep;
+	stepSizey = (float)imy2D2 * shiftRegion / totalStep;
+	for (int i = -totalStep; i < totalStep; i++) {
+		p2D[3] = offSetX + stepSizex * i;
+		for (int j = -totalStep; j < totalStep; j++) {
+			p2D[6] = offSetY + stepSizey * j;
+			costValue2D = - costfunc2D(p2D);
+			if (costValue2D > costValue2DXYmax) {
+				costValue2DXYmax = costValue2D;
+				shiftX = p2D[3];
+				shiftY = p2D[6];
+			}
+		}
+	}
+	p2D[3] = shiftX;
+	p2D[6] = shiftY;
+	fret = - costfunc2D(p2D);
+	affineTransform2D(d_img2D, imx2D1, imy2D1, imx2D2, imy2D2);
+	memcpy(iTmx, h_aff2D, DIM2D * sizeof(float));
+	cudaMemcpy(h_reg, d_img2D, totalSize1 * sizeof(float), cudaMemcpyDeviceToHost);
+
+	end = clock();
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[2] = (float)freeMem / 1048576.0f;
+	regRecords[5] = fret;
+	regRecords[6] = (float)(end - start) / CLOCKS_PER_SEC;
+	regRecords[8] = (2 * (int)totalStep + 1) ^ 2;
+
+	free(h_imgT);
+	free(p2D);
+	free(h_aff2D);
+	free_matrix(xi2D, 1, DIM2D, 1, DIM2D);
+	cudaFree(d_img2D);
+	cudaFreeArray(d_Array2D);
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[3] = (float)freeMem / 1048576.0f;
+	endWhole = clock();
+	regRecords[7] = (float)(endWhole - startWhole) / CLOCKS_PER_SEC;
+	return 0;
+}
+
+extern "C"
+int reg2d_shiftalignX0(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords) {
+	return 0;
+}
+
+extern "C"
+int reg2d_shiftalignX1(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords) {
+	//regRecords: 9-element array 
+	//[0] -[3]: initial GPU memory, after variables allocated, after processing, after variables released ( all in MB)
+	//[4] -[5]: initial cost function value, minimized cost function value
+	//[6] -[8]: registration time (in s), whole time (in s), total sub iterations
+	imx2D1 = sx; imy2D1 = sy;
+	imx2D2 = sx2; imy2D2 = sy2;
+
+	// total pixel count for each images
+	int totalSize1 = imx2D1 * imy2D1;
+	int totalSize2 = imx2D2 * imy2D2;
+	int totalSizeMax = (totalSize1 > totalSize2) ? totalSize1 : totalSize2;
+
+	//****************** Processing Starts*****************//
+	// variables for memory and time cost records
+	clock_t start, startWhole, end, endWhole;
+	size_t totalMem = 0;
+	size_t freeMem = 0;
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[0] = (float)freeMem / 1048576.0f;
+
+	startWhole = clock();
+	float fret;
+	int DIM2D = 6;
+	h_aff2D = (float *)malloc(DIM2D * sizeof(float));
+	static float *p2D = (float *)malloc((DIM2D + 1) * sizeof(float));
+	float **xi2D;
+	xi2D = matrix(1, DIM2D, 1, DIM2D);
+
+	float offSetX;
+	float costValue2D, costValue2DXYmax;
+	//float totalStep = 40;
+	//float shiftRegion = 0.6; //0< shiftRegion <1
+	float stepSizex;
+	float shiftX;
+
+
+	float *h_imgT = (float *)malloc(totalSizeMax * sizeof(float));
+	cudaMalloc((void **)&d_img2D, totalSize1 * sizeof(float));
+	cudaCheckErrors("****Memory allocating fails... GPU out of memory !!!!*****\n");
+
+	cudaChannelFormatDesc channelDesc2D =
+		cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+	cudaArray *d_Array2D;
+	cudaMallocArray(&d_Array2D, &channelDesc2D, imx2D2, imy2D2);
+	cudaCheckErrors("****Memory array allocating fails... GPU out of memory !!!!*****\n");
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[1] = (float)freeMem / 1048576.0f;
+
+
+	start = clock();
+	if (flagTmx) {
+		memcpy(h_aff2D, iTmx, DIM2D * sizeof(float));
+	}
+	else {
+		h_aff2D[0] = 1, h_aff2D[1] = 0, h_aff2D[2] = (imx2D2 - imx2D1) / 2;
+		h_aff2D[3] = 0, h_aff2D[4] = 1, h_aff2D[5] = (imy2D2 - imy2D1) / 2;
+	}
+	p2D[0] = 0;
+	p2D[1] = h_aff2D[0], p2D[2] = h_aff2D[1], p2D[3] = h_aff2D[2];
+	p2D[4] = h_aff2D[3], p2D[5] = h_aff2D[4], p2D[6] = h_aff2D[5];
+	for (int i = 1; i <= DIM2D; i++)
+		for (int j = 1; j <= DIM2D; j++)
+			xi2D[i][j] = (i == j ? 1.0 : 0.0);
+
+	float meanValue = (float)sumcpu(h_img1, totalSize1) / totalSize1;
+	addvaluecpu(h_imgT, h_img1, -meanValue, totalSize1);
+	multicpu(h_reg, h_imgT, h_imgT, totalSize1);
+	double sumSqrA = sumcpu(h_reg, totalSize1);
+	valueStatic2D = float(sqrt(sumSqrA));
+	if (valueStatic2D == 0) {
+		fprintf(stderr, "*** SD of image 1 is zero, empty image input **** \n");
+		exit(1);
+	}
+	cudaMemcpy(d_img2D, h_imgT, totalSize1 * sizeof(float), cudaMemcpyHostToDevice);
+
+	meanValue = (float)sumcpu(h_img2, totalSize2) / totalSize2;
+	addvaluecpu(h_imgT, h_img2, -meanValue, totalSize2);
+	cudaMemcpyToArray(d_Array2D, 0, 0, h_imgT, totalSize2 * sizeof(float), cudaMemcpyHostToDevice);
+	BindTexture2D(d_Array2D, channelDesc2D);
+	cudaCheckErrors("****Fail to bind 2D texture!!!!*****\n");
+	itNumStatic2D = 0;
+	regRecords[4] = - costfunc2D(p2D);
+
+	shiftX = 0;
+	offSetX = h_aff2D[2];
+	//*** translate step by step
+	costValue2DXYmax = 0;
+	stepSizex = (float)imx2D2 * shiftRegion / totalStep;
+	for (int i = -totalStep; i < totalStep; i++) {
+		p2D[3] = offSetX + stepSizex * i;
+		costValue2D = -costfunc2D(p2D);
+		if (costValue2D > costValue2DXYmax) {
+			costValue2DXYmax = costValue2D;
+			shiftX = p2D[3];
+		}
+	}
+	p2D[3] = shiftX;
+	fret = - costfunc2D(p2D);
+	affineTransform2D(d_img2D, imx2D1, imy2D1, imx2D2, imy2D2);
+	memcpy(iTmx, h_aff2D, DIM2D * sizeof(float));
+	cudaMemcpy(h_reg, d_img2D, totalSize1 * sizeof(float), cudaMemcpyDeviceToHost);
+
+	end = clock();
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[2] = (float)freeMem / 1048576.0f;
+	regRecords[5] = fret;
+	regRecords[6] = (float)(end - start) / CLOCKS_PER_SEC;
+	regRecords[8] = 2 * (int)totalStep + 1;
+
+	free(h_imgT);
+	free(p2D);
+	free(h_aff2D);
+	free_matrix(xi2D, 1, DIM2D, 1, DIM2D);
+	cudaFree(d_img2D);
+	cudaFreeArray(d_Array2D);
+
+
+	cudaMemGetInfo(&freeMem, &totalMem);
+	regRecords[3] = (float)freeMem / 1048576.0f;
+	endWhole = clock();
+	regRecords[7] = (float)(endWhole - startWhole) / CLOCKS_PER_SEC;
+	return 0;
+}
+
+
+extern "C"
 int reg2d_phasor0(long long int *shiftXY, float *h_img1, float *h_img2, long long int sx, long long int sy) {
 	return 0;
 }
@@ -2464,7 +2734,7 @@ int reg3d_affine1(float *d_reg, float *iTmx, float *d_img1, float *d_img2, long 
 	int affMethod, bool flagTmx, float FTOL, int itLimit, bool verbose, float *records) {
 	// **** affine registration when GPU memory is sufficient: 3 images + 1 cuda array ***
 	/*
-	*** affine registration method: 
+	*** affMethod: affine registration method 
 		0: no registration, transform d_img2 based on input matrix;
 		1: translation only; 
 		2: rigid body; 
@@ -2727,7 +2997,7 @@ int reg3d_affine2(float *d_reg, float *iTmx, float *h_img1, float *h_img2, long 
 	int affMethod, bool flagTmx, float FTOL, int itLimit, bool verbose, float *records) {
 	// **** affine registration when GPU memory is insufficient: 1 image + 1 cuda array ***
 	/*
-	*** affine registration method:
+	*** affMethod: affine registration method 
 	0: no registration, transform d_img2 based on input matrix;
 	1: translation only;
 	2: rigid body;

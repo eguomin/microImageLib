@@ -253,6 +253,21 @@ void alignsize3Dgpu(T *d_odata, T *d_idata, long long int sx, long long int sy, 
 	long long int sy2, long long int sz2);
 // 2D registration
 float costfunc2D(float *x);
+
+extern "C"
+int reg2d_shiftalign0(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords);
+extern "C"
+int reg2d_shiftalign1(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords);
+
+extern "C"
+int reg2d_shiftalignX0(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords);
+extern "C"
+int reg2d_shiftalignX1(float *h_reg, float *iTmx, float *h_img1, float *h_img2, long long int sx, long long int sy, long long int sx2, long long int sy2,
+	int flagTmx, float shiftRegion, float totalStep, float *regRecords);
+
 extern "C"
 int affinetrans2d0(float *h_odata, float *iTmx, float *h_idata, long long int sx, long long int sy, long long int sx2, long long int sy2);
 extern "C"
