@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
 	int regMode = atoi(argv[16]); // regMode--> 0: no registration; 1: one image only
 								  //			2: dependently, based on the results of last time point; 3: independently
 	int imRotation = atoi(argv[17]); //0: no rotation; 1: 90deg rotation ; -1: -90deg rotation ;
-	int flagInitialTmx = atoi(argv[18]); //initial matrix --> 0: default matrix; 1: input matrix; 2: based on 2D registration
+	int flagInitialTmx = atoi(argv[18]); //initial matrix --> 0: default matrix; 1: input matrix; 2: based on 3D phasor; 3: based on 2D registration
 	char *fileiTmx = argv[19]; // input matrix file
 	float FTOL = (float)atof(argv[20]); //1.0e-3, threshold for convergence of registration
 	int itLimit = atoi(argv[21]);
@@ -549,12 +549,14 @@ int main(int argc, char* argv[])
 	// regMode--> 0: no registration; 1: one image only
 	//			3: dependently, based on the results of last time point; 4: independently
 	float *h_affInitial = (float *)malloc((NDIM) * sizeof(float));
+	float *h_affPrevious = (float *)malloc((NDIM) * sizeof(float));
 	float *h_affWeighted = (float *)malloc((NDIM) * sizeof(float));
 	bool regMode3OffTrigger = false; // registration trigger for regMode 3
 	bool flagiTmx = true;
 	int regChoice = 2;
 	int affMethod = 6;
 	bool mStatus;
+	float costValueBar = 0.1; // threshold for cost function value
 	
 	// matrix
 	float *iTmx = (float *)malloc((NDIM + 4) * sizeof(float));
@@ -658,8 +660,8 @@ int main(int argc, char* argv[])
 			printf("... Preprocessing ...\n");
 			printf("\tInitializing and image reading ...\n");
 			f1 = fopen(fileLog, "a");
-			fprintf(f1, "...Registration...\n");
-			fprintf(f1, "	...Initializing (rotation, interpolation, initial matrix)...\n");
+			fprintf(f1, "... Registration...\n");
+			fprintf(f1, "	... Initializing (rotation, interpolation, initial matrix)...\n");
 			fclose(f1);
 			readtifstack(h_img1In, fileImg1, &tempSize[0]);
 			if ((imSize1In[0] != tempSize[0]) || (imSize1In[1] != tempSize[1]) || (imSize1In[2] != tempSize[2])) {
@@ -718,13 +720,30 @@ int main(int argc, char* argv[])
 				(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
 					flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 				mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
-				if (!mStatus) { // repeat with different initial matrix 
+				if (!mStatus || (regRecords[3] < costValueBar)) { // repeat with different initial matrix 
+					printf("\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+					printf("\n\t... Change scheme and redo the registration!!!\n");
+					f1 = fopen(fileLog, "a");
+					fprintf(f1, "\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+					fprintf(f1, "\n\t... Change scheme and redo the registration!!!\n");
+					fclose(f1);
 					if (regChoice == 4)
 						regChoiceTemp = 2;
 					else
 						regChoiceTemp = 4;
 					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoiceTemp, affMethod,
 						false, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+					if ((!mStatus || (regRecords[3] < costValueBar)) && flagiTmx) { // use input matrix
+						printf("\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						printf("\n\t... Use input transformation matrix!!!\n");
+						f1 = fopen(fileLog, "a");
+						fprintf(f1, "\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						fprintf(f1, "\n\t... Use input transformation matrix!!!\n");
+						fclose(f1);
+						memcpy(iTmx, h_affInitial, NDIM * sizeof(float)); // use input or previous matrix
+						(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], 0, affMethod,
+							true, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+					}
 				}
 				imgNum = imgNumStart - 1; // set to start batch processing
 				regMode = 0; // Don't do more registraion for other time points
@@ -732,49 +751,91 @@ int main(int argc, char* argv[])
 				continue;
 				break;
 			case 2:
-				if ((imgNum != imgNumStart) || (iColor > 0)) {
-					flagiTmx = 1; // use previous matrix as input
-					regChoice = 2;
-					memcpy(iTmx, h_affWeighted, NDIM * sizeof(float));
-				}
-				(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
-					flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
-				mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
-				if (!mStatus) { // repeat with different initial matrix 
-					if (regChoice == 4)
-						regChoiceTemp = 2;
-					else
-						regChoiceTemp = 4;
-					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoiceTemp, affMethod,
-						false, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
-					mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
-					if (!mStatus) { // apply previous matrix
-						memcpy(iTmx, h_affInitial, NDIM * sizeof(float)); // use input or previous matrix
-						(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], 0, affMethod,
-							true, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
-					}
-				}
 				if ((imgNum == imgNumStart) && (iColor == 0)) {
+					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
+						flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+					mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
+					if (!mStatus || (regRecords[3] < costValueBar)) { // repeat with different initial matrix 
+						printf("\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						printf("\n\t... Change scheme and redo the registration!!!\n");
+						f1 = fopen(fileLog, "a");
+						fprintf(f1, "\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						fprintf(f1, "\n\t... Change scheme and redo the registration!!!\n");
+						fclose(f1);
+						if (regChoice == 4)
+							regChoiceTemp = 2;
+						else
+							regChoiceTemp = 4;
+						(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoiceTemp, affMethod,
+							false, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+						mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
+						if ((!mStatus || (regRecords[3] < costValueBar)) &&flagiTmx) { // use input matrix
+							printf("\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+							printf("\n\t... Use input transformation matrix!!!\n");
+							f1 = fopen(fileLog, "a");
+							fprintf(f1, "\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+							fprintf(f1, "\n\t... Use input transformation matrix!!!\n");
+							fclose(f1);
+							memcpy(iTmx, h_affInitial, NDIM * sizeof(float)); // use input or previous matrix
+							(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], 0, affMethod,
+								true, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+						}
+					}
 					memcpy(h_affWeighted, iTmx, NDIM * sizeof(float));
 				}
 				else {
+					flagiTmx = 1; // initialize with previous matrix
+					regChoice = 2;
+					memcpy(iTmx, h_affWeighted, NDIM * sizeof(float));
+					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
+						flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+					mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
+					if (!mStatus || (regRecords[3] < costValueBar)) { // use previous matrix 
+						printf("\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						printf("\n\t... Use previous transformation matrix!!!\n");
+						f1 = fopen(fileLog, "a");
+						fprintf(f1, "\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						fprintf(f1, "\n\t... Use previous transformation matrix!!!\n");
+						fclose(f1);
+						memcpy(iTmx, h_affPrevious, NDIM * sizeof(float)); // use input or previous matrix
+						(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], 0, affMethod,
+							true, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+					}
 					for (int j = 0; j < NDIM; j++) {
 						h_affWeighted[j] = 0.8*h_affWeighted[j] + 0.2*iTmx[j]; // weighted matrix for next time point
 					}
 				}
+				memcpy(h_affPrevious, iTmx, NDIM * sizeof(float));
 				break;
 			case 3:
 				if (flagiTmx) memcpy(iTmx, h_affInitial, NDIM * sizeof(float));
 				(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoice, affMethod,
 					flagiTmx, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
 				mStatus = checkmatrix(iTmx, sx, sy, sz);//if registration is good
-				if (!mStatus) { // repeat with different initial matrix 
+				if (!mStatus || (regRecords[3] < costValueBar)) { // repeat with different initial matrix 
+					printf("\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+					printf("\n\t... Change scheme and redo the registration!!!\n");
+					f1 = fopen(fileLog, "a");
+					fprintf(f1, "\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+					fprintf(f1, "\n\t... Change scheme and redo the registration!!!\n");
+					fclose(f1);
 					if (regChoice == 4)
 						regChoiceTemp = 2;
 					else
 						regChoiceTemp = 4;
 					(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], regChoiceTemp, affMethod,
 						false, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+					if ((!mStatus || (regRecords[3] < costValueBar)) && flagiTmx) { // use input matrix
+						printf("\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						printf("\n\t... Use input transformation matrix!!!\n");
+						f1 = fopen(fileLog, "a");
+						fprintf(f1, "\n\t... Attempt failed: transformation matrix problematic or cost function value %f < threshold %2.2f\n", regRecords[3], costValueBar);
+						fprintf(f1, "\n\t... Use input transformation matrix!!!\n");
+						fclose(f1);
+						memcpy(iTmx, h_affInitial, NDIM * sizeof(float)); // use input or previous matrix
+						(void)reg3d(h_img2Reg, iTmx, h_img1, h_img2, &imSize1[0], &imSize2[0], 0, affMethod,
+							true, FTOL, itLimit, deviceNum, gpuMemMode, verbose, regRecords);
+					}
 				}
 				break;
 			default:
@@ -788,7 +849,7 @@ int main(int argc, char* argv[])
 
 			f1 = fopen(fileLog, "a");
 			fprintf(f1, "\t... initial cost function value: %f\n", regRecords[1]);
-			fprintf(f1, "\t... minimized cost function value: %f\n", regRecords[3]);
+			fprintf(f1, "\t... final cost function value: %f\n", regRecords[3]);
 			//fprintf(f1, "\t... total sub-iteration number: %d\n", int(regRecords[5]));
 			//fprintf(f1, "\t... each sub-iteration time cost: %2.3f ms\n", regRecords[4]);
 			//fprintf(f1, "\t... all iteration time cost: %2.3f s\n", regRecords[6]);
@@ -813,7 +874,7 @@ int main(int argc, char* argv[])
 			//  *************** Deconvolution: h_img1 and h_img2Reg ***********
 			printf("... Deconvolution ...\n");
 			f1 = fopen(fileLog, "a");
-			fprintf(f1, "...Deconvolution...\n");
+			fprintf(f1, "... Deconvolution...\n");
 			fclose(f1);
 			memset(h_decon, 0, totalSize * sizeof(float));
 			// gpuMemMode = 2;
@@ -829,22 +890,22 @@ int main(int argc, char* argv[])
 			f1 = fopen(fileLog, "a");
 			switch (gpuMemModeActual) {
 			case 0:
-				fprintf(f1, "	...All deconvolution performed with CPU !!!\n");
+				fprintf(f1, "	... All deconvolution performed with CPU\n");
 			case 1:
-				fprintf(f1, "	...Sufficient GPU memory, running in efficient mode !!!\n");
+				fprintf(f1, "	... Sufficient GPU memory, running in efficient mode\n");
 				break;
 			case 2:
-				fprintf(f1, "	...GPU memory partially optimized, running in memory saved mode !!!\n");
+				fprintf(f1, "	... GPU memory partially optimized, running in memory saved mode\n");
 				break;
 			case 3:
-				fprintf(f1, "	...GPU memory fully optimized, running in memory saved mode !!!\n");
+				fprintf(f1, "	... GPU memory fully optimized, running in memory saved mode\n");
 				break;
 			default:
-				fprintf(f1, "	...GPU mode error, no deconvolution performed !!!\n");
+				fprintf(f1, "	... GPU mode error, no deconvolution performed !!!\n");
 			}
 			//fprintf(f1, "	...all iteration time cost: %2.3f s\n", deconRecords[8]);
-			fprintf(f1, "	...deconvolution time cost: %2.3f s\n", deconRecords[9]);
-			fprintf(f1, "	...GPU free memory after deconvolution is %.0f MBites\n", deconRecords[5]);
+			fprintf(f1, "	... Deconvolution time cost: %2.3f s\n", deconRecords[9]);
+			fprintf(f1, "	... GPU free memory after deconvolution is %.0f MBites\n", deconRecords[5]);
 			fclose(f1);
 			writetifstack(fileDecon, h_decon, &imSize[0], bitPerSample);
 			time3 = clock();
