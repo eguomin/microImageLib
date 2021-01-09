@@ -53,7 +53,7 @@ make -clean
 (or) make -cleanAll
 ```
 
-The compiled binaries (for both Windows 10 and Ubuntu 18.04 LTS) along with the library dependencies are included [here](https://www.dropbox.com/sh/czn4kwzwcgy0s3x/AADipfEsUSwuCsEBg8P7wc4_a?dl=0), for users who want to use the compiled versions.
+The compiled binaries (for both Windows 10 and Ubuntu 18.04 LTS) along with the library dependencies are included in the latest [diSPIMFusion.zip: diSPIMFusion/cudaLib/bin](https://github.com/eguomin/diSPIMFusion/releases), for users who want to use the compiled versions.
 
 ## Usage
 Users can use command with option `-h` or `-help` to find the introduction and manual for each application, e.g.
@@ -61,7 +61,7 @@ Users can use command with option `-h` or `-help` to find the introduction and m
 spimFusion -h
 ```
 
-Users can also download [a test dataset with a few example scripts](https://www.dropbox.com/sh/czn4kwzwcgy0s3x/AADipfEsUSwuCsEBg8P7wc4_a?dl=0). The example scripts are a group of *cmd* or *shell* commands that invoke the binary applications with configurations for the test dataset. To run the scripts, users need to open the command terminal and get to the directory of the scripts, i.e., the folder `./cudaLib`.
+Users can also download a test dataset with a few example scripts in the latest [diSPIMFusion.zip: diSPIMFusion/cudaLib](https://github.com/eguomin/diSPIMFusion/releases). The example scripts are a group of *cmd* or *shell* commands that invoke the binary applications with configurations for the test dataset. To run the scripts, users need to open the command terminal and get to the directory of the scripts, i.e., the folder `./cudaLib`.
 
 1) For Windows PC, run any of the `cmd_xx.bat` scripts, e.g.
     ```posh
