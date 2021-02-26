@@ -11,7 +11,7 @@ A collection of 3D image processing functions and applications with GPU implemen
 - spimFusion: 3D dual-view image fusion designed for diSPIM data, incorporating image rotation, interporation, registration and joint deconvolution.
 - spimFusionBatch: a batch processing version of spimFusion for diSPIM time-lapse data, additionally including functions for generating 2D/3D maximum intensity projections (MIP) of the deconvolved images (functionally same with the ImageJ diSPIMFusion package).
 
-Users can find extended code and description for diSPIM data processing at [diSPIMFusion](https://github.com/eguomin/diSPIMFusion), and for other single-view and multiple-view microscopic data processing at [regDeconProject](https://github.com/eguomin/regDeconProject).
+Extended code and description can be found at [diSPIMFusion](https://github.com/eguomin/diSPIMFusion) for diSPIM data processing, and at [regDeconProject](https://github.com/eguomin/regDeconProject) for other single-view and multiple-view microscopic data processing.
 
 ## System Requirements and Compiling
 
